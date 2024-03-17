@@ -1,35 +1,42 @@
 #!/usr/bin/env python3
 import sys
-import random
-from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6 import QtWidgets
+from PySide6.QtWidgets import QWidget, QMainWindow, QGridLayout
+from PySide6.QtGui import QColor, QPalette
 
-class HelloWorldWidget(QtWidgets.QWidget):
+class Color(QWidget):
+    def __init__(self, color):
+        super(Color, self).__init__()
+        self.setAutoFillBackground(True)
+
+        palette = self.palette()
+        palette.setColor(QPalette.ColorRole.Window, QColor(color))
+        self.setPalette(palette)
+
+
+
+class MainWindow(QMainWindow):
     def __init__(self):
-        super().__init__()
+        super(MainWindow, self).__init__()
 
-        self.hello = ["Zdravo svete!", "Hallo Walt!"]
-        # self.text = QtWidgets.QLabel("Hello World", alignment=QtCore.Qt.AlignCenter) #FIXME
-        # self.text = QtWidgets.QLabel("Hello World", alignment=QtCore.Qt.AlignmentFlag.AlignCenter) #FIXME
+        self.num_rows = 10;
+        self.num_columns = 10;
 
-        self.button = QtWidgets.QPushButton("Click me!")
-        self.text = QtWidgets.QLabel("Hello World!")
-        self.text.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        layout = QGridLayout();
+        for i in range(0, self.num_rows):
+            for j in range(0, self.num_columns):
+                layout.addWidget(Color('gray'), i, j);
 
-        layout = QtWidgets.QVBoxLayout(self) # self.layout = QtWidgets.QVBoxLayout(self)
-        layout.addWidget(self.text)
-        layout.addWidget(self.button)
+        widget = QWidget();
+        widget.setLayout(layout);
+        self.setCentralWidget(widget);
 
-        self.button.clicked.connect(self.magic)
 
-    @QtCore.Slot()
-    def magic(self):
-        self.text.setText(random.choice(self.hello))
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
 
-    widget = HelloWorldWidget()
-    widget.resize(800, 600)
-    widget.show()
+    window = MainWindow();
+    window.show()
 
     sys.exit(app.exec())
