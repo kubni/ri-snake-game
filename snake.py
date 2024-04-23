@@ -1,3 +1,7 @@
+# TODO: WIP
+from PySide6.QtCore import QObject, Signal
+
+
 class Point:
     def __init__(self, x: int, y: int):
         self.x = x
@@ -7,8 +11,17 @@ class Point:
         return isinstance(other, Point) and self.x == other.x and self.y == other.y
 
 
-class Snake() :
+class Snake(QObject):
+
+    signal_snake_moved = Signal(list)
+    signal_snake_moved_noargs = Signal()
+
     def __init__(self):
+        super().__init__()
         self.body = [Point(2, 2), Point(2, 3), Point(2, 4)]
 
-    
+    def emit_snake_moved_noargs(self):
+        self.signal_snake_moved_noargs.emit()
+
+    def emit_snake_moved(self):
+        self.signal_snake_moved.emit(self.body)
