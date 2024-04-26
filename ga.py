@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from typing import Tuple
+from random import random
 
 from snake import Snake
 
@@ -35,3 +36,8 @@ class Population:
 
     def get_avg_pop_fitness(self) -> float:
         return self.get_total_pop_fitness() / self.population_size
+
+
+def tournament_selection(population: list[Snake], tournament_size: int) -> Snake:
+    pool = random.sample(population, tournament_size)
+    return max(pool, key=lambda s: s.fitness)

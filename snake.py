@@ -19,6 +19,7 @@ class Snake(QObject):
     def __init__(self):
         super().__init__()
         self.body = [Point(2, 2), Point(2, 3), Point(2, 4)]
+        self.fitness = -1  # NOTE: Placeholder
 
     def emit_snake_moved(self):
         self.signal_snake_moved.emit(self.body)
