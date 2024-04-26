@@ -14,6 +14,7 @@ class MainWindow(QMainWindow):
         self.num_rows = 10
         self.num_columns = 10
 
+<<<<<<< HEAD
         self.old_body = None  # NOTE: Placeholder
         self.snake = Snake(board_size=(self.num_rows, self.num_columns))  # TODO: Snake(self.num_rows, self.num_columns)
         self.grid = self.initialize_grid(self.num_rows, self.num_columns, "gray")
@@ -27,6 +28,10 @@ class MainWindow(QMainWindow):
 
         self.snake.placeholder_change_body()
         self.snake.emit_snake_moved()
+=======
+        snake = Snake(board_size=(self.num_rows, self.num_columns))
+        self.grid = self.initialize_grid(snake, 10, 10, "gray")
+>>>>>>> f910563 (Create move function for snake)
 
         widget = QWidget()
         widget.setLayout(self.grid)
