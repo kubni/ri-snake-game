@@ -25,3 +25,6 @@ class Snake(QObject):
 
     def emit_snake_moved(self):
         self.signal_snake_moved.emit(self.body)
+
+    def placeholder_change_body(self):
+        self.body = [Point(2, 2), Point(2, 3), Point(3, 2)]
