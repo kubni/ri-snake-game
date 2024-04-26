@@ -19,7 +19,7 @@ class MainWindow(QMainWindow):
         self.num_rows = 10
         self.num_columns = 10
 
-        snake = Snake()
+        snake = Snake(board_size=(self.num_rows, self.num_columns))
         layout = self.initialize_grid(snake, 10, 10, "gray")
 
         widget = QWidget()
