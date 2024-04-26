@@ -15,7 +15,7 @@ class MainWindow(QMainWindow):
         self.num_columns = 10
 
         self.old_body = None  # NOTE: Placeholder
-        self.snake = Snake()  # TODO: Snake(self.num_rows, self.num_columns)
+        self.snake = Snake(board_size=(self.num_rows, self.num_columns))  # TODO: Snake(self.num_rows, self.num_columns)
         self.grid = self.initialize_grid(self.num_rows, self.num_columns, "gray")
 
         # Connect the signal to the slot
