@@ -32,8 +32,23 @@ class MainWindow(QMainWindow):
         widget.setLayout(self.grid)
         self.setCentralWidget(widget)
 
-    def initialize_grid(self, n_rows: int, n_columns: int, grid_color) -> QGridLayout:
-        self.grid = QGridLayout()
+        for i in range(10):
+            snake.move()
+            for p in snake.body:   
+                print(snake.body[0].x)
+                label = QLabel()
+                label.setStyleSheet("background-color: green")
+                self.grid.addWidget(label, p.x, p.y)
+
+    def initialize_grid(
+        self,
+        snake: Snake,
+        n_rows: int,
+        n_columns: int,
+        grid_color: str,
+    ) -> QGridLayout:
+        layout = QGridLayout()
+        print("Snek:", snake)
         for i in range(0, n_rows):
             for j in range(0, n_columns):
                 label = QLabel()
