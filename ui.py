@@ -20,11 +20,19 @@ class MainWindow(QMainWindow):
         self.num_columns = 10
 
         snake = Snake(board_size=(self.num_rows, self.num_columns))
-        layout = self.initialize_grid(snake, 10, 10, "gray")
+        self.grid = self.initialize_grid(snake, 10, 10, "gray")
 
         widget = QWidget()
-        widget.setLayout(layout)
+        widget.setLayout(self.grid)
         self.setCentralWidget(widget)
+
+        for i in range(10):
+            snake.move()
+            for p in snake.body:   
+                print(snake.body[0].x)
+                label = QLabel()
+                label.setStyleSheet("background-color: green")
+                self.grid.addWidget(label, p.x, p.y)
 
     def initialize_grid(
         self,
