@@ -20,9 +20,6 @@ class Snake(QObject):
         super().__init__()
         self.body = [Point(2, 2), Point(2, 3), Point(2, 4)]
 
-    def emit_snake_moved_noargs(self):
-        self.signal_snake_moved_noargs.emit()
-
     def emit_snake_moved(self):
         self.signal_snake_moved.emit(self.body)
 

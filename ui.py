@@ -2,7 +2,6 @@
 import sys
 from snake import Snake
 
-# from PySide6 import QtWidgets, QtCore
 from PySide6.QtWidgets import QApplication, QWidget, QMainWindow, QGridLayout, QLabel
 from PySide6.QtCore import Slot
 
