@@ -35,3 +35,23 @@ class Population:
 def tournament_selection(population: Population, tournament_size: int) -> Snake:
     pool = random.sample(population.snakes, tournament_size)
     return max(pool, key=lambda s: s.fitness)
+
+
+def crossover(parent1, parent2) -> Tuple[Snake, Snake]:
+    split_pos = random.randrange(0, len(parent1.code))
+
+    child1 = Snake()
+    child2 = Snake()
+    child1.code[:split_pos] = parent1.code[:split_pos]
+    child1.code[split_pos:] = parent2.code[split_pos:]
+    child2.code[:split_pos] = parent2.code[:split_pos]
+    child2.code[split_pos:] = parent1.code[split_pos:]
+
+    return (child1, child2)
+
+
+def mutation(snake: Snake, mutation_probability: float):
+    code_len = len(snake.code)
+    for i in range(code_len):
+        if random.random() < mutation_probability:
+            snake.code[i] = -snake.code[i]  # NOTE: Placeholder
