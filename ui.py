@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-import sys
 from snake import Snake
+from ga import Population, tournament_selection
 
 from PySide6.QtWidgets import QApplication, QWidget, QMainWindow, QGridLayout, QLabel
 from PySide6.QtCore import Slot
+
+import sys
 
 
 class MainWindow(QMainWindow):
