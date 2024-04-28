@@ -15,46 +15,27 @@ class MainWindow(QMainWindow):
         self.num_columns = 10
 
         self.old_body = None  # NOTE: Placeholder
-        self.snake = Snake(board_size=(self.num_rows, self.num_columns))  # TODO: Snake(self.num_rows, self.num_columns)
+        self.snake = Snake(board_size=(self.num_rows, self.num_columns)) 
         self.grid = self.initialize_grid(self.num_rows, self.num_columns, "gray")
-
-        # Connect the signal to the slot
-        self.snake.signal_snake_moved.connect(self.on_snake_move)
-
-        # Test signal-slot interaction
-        # TODO: In the future, this can be called from some Snake method.
-        self.snake.emit_snake_moved()
-
-        self.snake.placeholder_change_body()
-        self.snake.emit_snake_moved()
 
         widget = QWidget()
         widget.setLayout(self.grid)
         self.setCentralWidget(widget)
 
-        for i in range(10):
-            snake.move()
-            for p in snake.body:   
-                print(snake.body[0].x)
-                label = QLabel()
-                label.setStyleSheet("background-color: green")
-                self.grid.addWidget(label, p.x, p.y)
-
     def initialize_grid(
         self,
-        snake: Snake,
         n_rows: int,
         n_columns: int,
         grid_color: str,
     ) -> QGridLayout:
-        layout = QGridLayout()
-        print("Snek:", snake)
+        grid = QGridLayout()
+        print("Snek:", self.snake)
         for i in range(0, n_rows):
             for j in range(0, n_columns):
                 label = QLabel()
                 label.setStyleSheet(f"background-color: {grid_color}")
-                self.grid.addWidget(label, i, j)
-        return self.grid
+                grid.addWidget(label, i, j)
+        return grid
 
     @Slot(list)
     def on_snake_move(self, new_body):
