@@ -50,7 +50,13 @@ class Snake:
     def generate_apple(self):
         width = self.board_size[0]
         height = self.board_size[1]
-        apple_options = [Point(i // width,i % width) for i in range(width * height) if Point(i // width,i % width) not in self.body]
+        apple_options = [
+            Point(x, y)
+            for x in range(width)
+            for y in range(height)
+            if Point(x, y) not in self.body
+        ]
+
         if apple_options:
             self.apple = random.choice(apple_options)
         else:
@@ -111,9 +117,12 @@ class Snake:
                 new_position = Point(1,2)
 
         if self.is_valid(new_position):
-            self.body.appendleft(new_position)  # new head
-            self.body.pop()
-            # remove tail
+            if new_position == self.apple:
+                self.body.appendleft(new_position)  # new head
+                self.generate_apple()
+            else:
+                self.body.pop() # remove tail
+                self.body.appendleft(new_position)
         else:
             self.is_alive = False
         
