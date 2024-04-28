@@ -25,6 +25,7 @@ class Snake():
 
         start_direction = self.possible_directions[random.randint(0,3)]
         self.initialize_snake_body(start_direction)
+        self.current_direction = start_direction
         self.generate_apple()
 
 
@@ -61,7 +62,7 @@ class Snake():
         if new_position.x < 0 or new_position.x > self.board_size[0] - 1 or new_position.y < 0 or new_position.y > self.board_size[1] - 1:
             return False
     
-        if new_position == self.body[-1]:
+        if new_position == self.body[-1]: #Tail is valid new position cuz tail will move
             return True
         elif new_position in self.body:
             return False
@@ -72,18 +73,34 @@ class Snake():
         if not self.is_alive:
             return
         
-        direction = self.possible_directions[random.randint(0, 3)] # Later change this not to be random
+        new_direction = self.possible_directions[random.randint(0, 3)] # Later change this not to be random
 
         head = self.body[0]
-        match(direction):
-            case 'u':
-                new_position = Point(head.x, head.y - 1)
+        match(new_direction):
+            case 'u':    
+                if self.current_direction == 'd':                
+                    new_position = Point(head.x, head.y + 1) 
+                else:
+                    new_position = Point(head.x, head.y - 1)
+                    self.current_direction = new_direction
             case 'r':
-                new_position = Point(head.x + 1, head.y)
+                if self.current_direction == 'l':
+                    new_position = Point(head.x - 1, head.y)  
+                else:
+                    new_position = Point(head.x + 1, head.y)
+                    self.current_direction = new_direction
             case 'd':
-                new_position = Point(head.x - 1, head.y)
+                if self.current_direction == 'u':
+                    new_position = Point(head.x, head.y - 1)  
+                else:
+                    new_position = Point(head.x, head.y + 1)
+                    self.current_direction = new_direction
             case 'l':
-                new_position = Point(head.x, head.y - 1)
+                if self.current_direction == 'r':
+                    new_position = Point(head.x + 1, head.y)  
+                else:
+                    new_position = Point(head.x - 1, head.y)
+                    self.current_direction = new_direction
             case _ :
                 new_position = Point(1,2)
 
