@@ -1,7 +1,10 @@
+<<<<<<< HEAD
 # TODO: WIP
 from PySide6.QtCore import QObject, Signal
 
 
+=======
+>>>>>>> f9105636aa12596dca73a6269f98d65f2172482f
 from collections import deque
 import random
 
@@ -16,6 +19,7 @@ class Point:
     def __str__(self):
         return f"({self.x}, {self.y})"
 
+<<<<<<< HEAD
 
 class Snake(QObject):
 
@@ -31,6 +35,17 @@ class Snake(QObject):
         y = random.randint(2, board_size[1] - self.initial_length)
         self.start_position = Point(x, y)
 
+=======
+class Snake() :
+    def __init__(self, board_size):
+        self.board_size = board_size
+        self.possible_directions = ['u', 'r', 'd', 'l']
+        self.initial_length = 3
+        x = random.randint(2, board_size[0] - self.initial_length)
+        y = random.randint(2, board_size[1] - self.initial_length)
+        self.start_position = Point(x, y)
+
+>>>>>>> f9105636aa12596dca73a6269f98d65f2172482f
         start_direction = self.possible_directions[random.randint(0,3)]
         self.initialize_snake_body(start_direction)
 
@@ -47,11 +62,14 @@ class Snake(QObject):
                 snake_body = [head, Point(head.x, head.y  - 1), Point(head.x, head.y - 2)]
             case 'l':
                 snake_body = [head, Point(head.x + 1, head.y), Point(head.x + 2, head.y)]
+<<<<<<< HEAD
         self.fitness = -1  # NOTE: Placeholder
         self.code = [1, 2, 3, 42]  # NOTE: Placeholder
 
     def emit_snake_moved(self):
         self.signal_snake_moved.emit(self.body)
+=======
+>>>>>>> f9105636aa12596dca73a6269f98d65f2172482f
 
         
         self.body = deque(snake_body) # for easier adding and removing from both ends of the snake
