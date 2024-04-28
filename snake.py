@@ -135,9 +135,12 @@ class Snake:
                 new_position = Point(1, 2)
 
         if self.is_valid(new_position):
-            self.body.appendleft(new_position)  # new head
-            self.body.pop()
-            # remove tail
+            if new_position == self.apple:
+                self.body.appendleft(new_position)  # new head
+                self.generate_apple()
+            else:
+                self.body.pop()  # remove tail
+                self.body.appendleft(new_position)
         else:
             self.is_alive = False
 
