@@ -25,11 +25,13 @@ class Snake():
 
         start_direction = self.possible_directions[random.randint(0,3)]
         self.initialize_snake_body(start_direction)
+        self.generate_apple()
 
 
     def initialize_snake_body(self, start_direction):
         head = self.start_position
 
+        snake_body = []
         match(start_direction):
             case 'u':
                 snake_body = [head, Point(head.x, head.y + 1), Point(head.x, head.y + 2)]
@@ -42,6 +44,18 @@ class Snake():
 
         self.body = deque(snake_body) # for easier adding and removing from both ends of the snake
         self.is_alive = True
+
+    def generate_apple(self):
+        width = self.board_size[0]
+        height = self.board_size[1]
+        apple_options = [Point(i // width,i % width) for i in range(width * height) if Point(i // width,i % width) not in self.body]
+        if apple_options:
+            self.apple = random.choice(apple_options)
+        else:
+            print("End game or error")
+            return
+
+    
 
     def is_valid(self, new_position):
         if new_position.x < 0 or new_position.x > self.board_size[0] - 1 or new_position.y < 0 or new_position.y > self.board_size[1] - 1:
@@ -70,6 +84,8 @@ class Snake():
                 new_position = Point(head.x - 1, head.y)
             case 'l':
                 new_position = Point(head.x, head.y - 1)
+            case _ :
+                new_position = Point(1,2)
 
         if self.is_valid(new_position):
             self.body.appendleft(new_position) #new head
@@ -78,3 +94,6 @@ class Snake():
             self.is_alive = False
         
         return
+    
+    def __str__(self):
+        return f"Body: {list(map(str, self.body))}"
