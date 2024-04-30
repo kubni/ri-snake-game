@@ -72,8 +72,13 @@ class MainWindow(QMainWindow):
 
         self.old_body = copy.deepcopy(self.snake.body)  # TODO: copy?
 
+        # TODO: Place this in if()
         self.snake.move()
         print("Snake moved")
+        if not self.snake.is_alive:
+            # TODO: Show the end message
+            # sys.exit(1)
+            print("You lost the game")
 
 
 if __name__ == "__main__":
