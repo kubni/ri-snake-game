@@ -1,4 +1,5 @@
 from collections import deque
+from neural_network import NeuralNetwork
 import random
 
 
@@ -14,15 +15,26 @@ class Point:
         return f"({self.x}, {self.y})"
 
 
+class Vision:
+    def __init__(self, distance_to_apple, distance_to_wall, distance_to_body):
+        self.distance_to_apple = distance_to_apple
+        self.distance_to_wall = distance_to_wall
+        self.distance_to_body = distance_to_body
+
 class Snake:
     def __init__(self, board_size):
         self.board_size = board_size
         self.possible_directions = ["u", "r", "d", "l"]
         self.initial_length = 3
+        self.vision = [None for _ in range(8)] # snake can see in 8 directions (south, east , south-east ...)  
+        self.vision_steps = [
+            Point(-1, 0), Point(-1, 1), Point(0, 1), Point(1, 1),
+            Point(1, 0), Point(1, -1), Point(0, -1), Point(-1, -1)
+            ]
+        self.model = NeuralNetwork()
         x = random.randint(2, board_size[0] - self.initial_length)
         y = random.randint(2, board_size[1] - self.initial_length)
         self.start_position = Point(x, y)
-
         start_direction = self.possible_directions[random.randint(0, 3)]
         self.initialize_snake_body(start_direction)
         self.current_direction = start_direction
@@ -96,6 +108,49 @@ class Snake:
             return False
 
         return True
+
+    def look_in_direction(self, vision_step):
+        distance_to_apple = -1
+        distance_to_wall = -1
+        distance_to_body = -1
+
+        current_tile = self.body[0]
+        current_tile.x += vision_step.x
+        current_tile.y += vision_step.y
+        total_distance = 1 # first tile from our head in direction
+
+        is_body_found = False
+        is_apple_found = False
+        while self.is_valid(current_tile):
+            if not is_body_found and current_tile in self.body:
+                is_body_found = True
+                distance_to_body = total_distance
+
+            if not is_apple_found and current_tile == self.apple:
+                is_apple_found = True
+                distance_to_apple = total_distance
+
+            total_distance += 1
+            current_tile.x += vision_step.x
+            current_tile.y += vision_step.y
+
+        distance_to_wall = 1 / total_distance
+        distance_to_apple = 1 if distance_to_apple != -1 else 0
+        distance_to_body = 1 if distance_to_body != -1 else 0 
+        
+        vision_in_direction = Vision(distance_to_apple, distance_to_wall, distance_to_body)
+        return vision_in_direction
+
+    def look(self):
+        for i, vision_step in enumerate(self.vision_steps):
+            vision_in_direction = self.look_in_direction(vision_step)
+            self.vision[i] = vision_in_direction
+
+    def update(self):
+        self.look()
+        nn_input = "" # this should be snake vision + encoded direction of a head + encoded direction of a tail
+        output = self.model(nn_input)
+        print(output)
 
     def move(self):
         if not self.is_alive:
