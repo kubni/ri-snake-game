@@ -10,7 +10,7 @@ class NeuralNetwork(nn.Module):
         self.fc2 = nn.Linear(20, 12)
         self.sigmoid = nn.Sigmoid()
         self.fc3 = nn.Linear(12,4)
-        self.softmax = nn.Softmax(dim=1)
+        self.softmax = nn.Softmax(dim=0)
     
 
     def forward(self, x):

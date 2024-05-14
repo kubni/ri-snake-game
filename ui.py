@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
                 self.grid.addWidget(label, p.x, p.y)
 
         self.old_body = copy.deepcopy(self.snake.body)  # TODO: copy?
-
+        self.snake.update()
         # TODO: Place this in if()
         self.snake.move()
         print("Snake moved")

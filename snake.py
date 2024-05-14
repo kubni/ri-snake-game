@@ -22,9 +22,9 @@ class Point:
 
 class Vision:
     def __init__(self, distance_to_apple, distance_to_wall, distance_to_body):
-        self.distance_to_apple = distance_to_apple
-        self.distance_to_wall = distance_to_wall
-        self.distance_to_body = distance_to_body
+        self.distance_to_apple = float(distance_to_apple)
+        self.distance_to_wall = float(distance_to_wall)
+        self.distance_to_body = float(distance_to_body)
 
 class Snake:
     def __init__(self, board_size):
@@ -157,7 +157,8 @@ class Snake:
         tail_direction_array[self.possible_directions.index(self.current_tail_direction)] = 1
         input_array = np.append(input_array, tail_direction_array)
 
-        input_array = np.concatenate(input_array)
+        # input_array = np.concatenate(input_array)
+        print(input_array)
         return input_array
 
 
@@ -171,7 +172,7 @@ class Snake:
     def update(self):
         self.look()
         input_array = self.create_input_for_nn() # this should be snake vision + encoded direction of a head + encoded direction of a tail
-        output = self.model(torch.tensor(input_array))
+        output = self.model(torch.tensor(input_array).float())
         print(output)
 
     def move(self):
