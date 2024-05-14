@@ -1,6 +1,8 @@
 from collections import deque
 from neural_network import NeuralNetwork
 import random
+import torch
+import numpy as np
 
 
 class Point:
@@ -38,6 +40,7 @@ class Snake:
         start_direction = self.possible_directions[random.randint(0, 3)]
         self.initialize_snake_body(start_direction)
         self.current_direction = start_direction
+        self.current_tail_direction = start_direction 
         self.generate_apple()
 
     def initialize_snake_body(self, start_direction):
@@ -78,7 +81,6 @@ class Snake:
     def generate_apple(self):
         width = self.board_size[0]
         height = self.board_size[1]
-        # apple_options = [Point(i // width,i % width) for i in range(width * height) if Point(i // width,i % width) not in self.body]
         apple_options = [
             Point(x, y)
             for x in range(width)
@@ -140,6 +142,24 @@ class Snake:
         
         vision_in_direction = Vision(distance_to_apple, distance_to_wall, distance_to_body)
         return vision_in_direction
+    
+    def create_input_for_nn(self):
+        input_array = np.array(list(map(lambda x: [x.distance_to_apple, x.distance_to_wall, x.distance_to_body] ,self.vision)))
+        
+        snake_direction_array = [0 for _ in range(len(self.possible_directions))]
+        snake_direction_array[self.possible_directions.index(self.current_direction)] = 1 # array of directions when only one of them have value 1
+        input_array = np.append(input_array, snake_direction_array)
+
+        tail_direction_array = [0 for _ in range(len(self.possible_directions))]
+        tail_direction_array[self.possible_directions.index(self.current_tail_direction)] = 1
+        input_array = np.append(input_array, tail_direction_array)
+
+        input_array = np.concatenate(input_array)
+
+        return input_array
+
+
+
 
     def look(self):
         for i, vision_step in enumerate(self.vision_steps):
@@ -148,8 +168,8 @@ class Snake:
 
     def update(self):
         self.look()
-        nn_input = "" # this should be snake vision + encoded direction of a head + encoded direction of a tail
-        output = self.model(nn_input)
+        input_array = self.create_input_for_nn() # this should be snake vision + encoded direction of a head + encoded direction of a tail
+        output = self.model(torch.tensor(input_array))
         print(output)
 
     def move(self):
@@ -196,6 +216,19 @@ class Snake:
             else:
                 self.body.pop()  # remove tail
                 self.body.appendleft(new_position)
+
+            p1 = self.body[-1]
+            p2 = self.body[-2]
+            difference = p2 - p1
+            if(difference.x > 0):
+                self.current_tail_direction = 'r'
+            elif(difference.x < 0):
+                self.current_tail_direction = 'l'
+            elif(difference.y > 0):
+                self.current_tail_direction = 'd'
+            elif(difference.y < 0):
+                self.current_tail_direction = 'u'
+
         else:
             self.is_alive = False
 
