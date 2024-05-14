@@ -10,6 +10,9 @@ class Point:
         self.x = x
         self.y = y
 
+    def __sub__(self, other):
+        return Point(self.x - other.x, self.y - other.y)
+
     def __eq__(self, other):
         return isinstance(other, Point) and self.x == other.x and self.y == other.y
 
@@ -155,7 +158,6 @@ class Snake:
         input_array = np.append(input_array, tail_direction_array)
 
         input_array = np.concatenate(input_array)
-
         return input_array
 
 
