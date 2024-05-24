@@ -32,6 +32,7 @@ class Snake:
         self.board_size = board_size
         self.possible_directions = ["u", "r", "d", "l"]
         self.initial_length = 3
+        self.score = 0
         self.vision = [None for _ in range(8)] # snake can see in 8 directions (south, east , south-east ...)  
         self.vision_steps = [
             Point(-1, 0), Point(-1, -1), Point(0, -1), Point(1, -1),
@@ -223,6 +224,7 @@ class Snake:
         if self.is_valid(new_position):
             if new_position == self.apple:
                 self.body.appendleft(new_position)  # new head
+                self.score += 1
                 self.generate_apple()
             else:
                 self.body.pop()  # remove tail
