@@ -50,31 +50,31 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def update_on_timeout(self):
-        # Color the apple
-        label = QLabel()
-        label.setStyleSheet("background-color: red;")
-        self.grid.addWidget(label, self.snake.apple.x, self.snake.apple.y)
-        # Color new snake positions with green:
-        # TODO: Color only the new cell
-        for p in self.snake.body:
+        if self.snake.is_alive: # Color the apple
             label = QLabel()
-            label.setStyleSheet("background-color: green")
-            self.grid.addWidget(label, p.x, p.y)
-
-        # Color old snake positions with gray:
-        if self.old_body != None:
-            old_cells = list(filter(lambda p: p not in self.snake.body, self.old_body))
-
-            for p in old_cells:
+            label.setStyleSheet("background-color: red;")
+            self.grid.addWidget(label, self.snake.apple.y, self.snake.apple.x)
+            # Color new snake positions with green:
+            # TODO: Color only the new cell
+            for p in self.snake.body:
                 label = QLabel()
-                label.setStyleSheet("background-color: blue")
-                self.grid.addWidget(label, p.x, p.y)
+                label.setStyleSheet("background-color: green")
+                self.grid.addWidget(label, p.y, p.x)
 
-        self.old_body = copy.deepcopy(self.snake.body)  # TODO: copy?
-        self.snake.update()
-        # TODO: Place this in if()
-        self.snake.move()
-        print("Snake moved")
+            # Color old snake positions with gray:
+            if self.old_body != None:
+                old_cells = list(filter(lambda p: p not in self.snake.body, self.old_body))
+
+                for p in old_cells:
+                    label = QLabel()
+                    label.setStyleSheet("background-color: blue")
+                    self.grid.addWidget(label, p.y, p.x)
+
+            self.old_body = copy.deepcopy(self.snake.body)  # TODO: copy?
+            self.snake.update()
+            # TODO: Place this in if()
+            self.snake.move()
+            print("Snake moved")
         if not self.snake.is_alive:
             # TODO: Show the end message
             # sys.exit(1)
