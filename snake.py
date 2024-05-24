@@ -3,6 +3,7 @@ from neural_network import NeuralNetwork
 import random
 import torch
 import numpy as np
+import copy
 
 
 class Point:
@@ -33,14 +34,15 @@ class Snake:
         self.initial_length = 3
         self.vision = [None for _ in range(8)] # snake can see in 8 directions (south, east , south-east ...)  
         self.vision_steps = [
-            Point(-1, 0), Point(-1, 1), Point(0, 1), Point(1, 1),
-            Point(1, 0), Point(1, -1), Point(0, -1), Point(-1, -1)
+            Point(-1, 0), Point(-1, -1), Point(0, -1), Point(1, -1),
+            Point(1, 0), Point(1, 1), Point(0, 1), Point(-1, 1)
             ]
         self.model = NeuralNetwork()
         x = random.randint(2, board_size[0] - self.initial_length)
         y = random.randint(2, board_size[1] - self.initial_length)
         self.start_position = Point(x, y)
         start_direction = self.possible_directions[random.randint(0, 3)]
+        print("Start direction: ", start_direction)
         self.initialize_snake_body(start_direction)
         self.current_direction = start_direction
         self.current_tail_direction = start_direction 
@@ -95,8 +97,8 @@ class Snake:
         else:
             print("End game or error")
             return
-
-    def is_valid(self, new_position):
+        
+    def is_inside_grid(self, new_position):
         if (
             new_position.x < 0
             or new_position.x > self.board_size[0] - 1
@@ -104,7 +106,10 @@ class Snake:
             or new_position.y > self.board_size[1] - 1
         ):
             return False
+           
+        return True
 
+    def is_valid(self, new_position):
         if (
             new_position == self.body[-1]
         ):  # Tail is valid new position cuz tail will move
@@ -112,21 +117,21 @@ class Snake:
         elif new_position in self.body:
             return False
 
-        return True
+        return self.is_inside_grid(new_position)
 
     def look_in_direction(self, vision_step):
         distance_to_apple = -1
         distance_to_wall = -1
         distance_to_body = -1
 
-        current_tile = self.body[0]
+        current_tile = copy.deepcopy(self.body[0])
         current_tile.x += vision_step.x
         current_tile.y += vision_step.y
         total_distance = 1 # first tile from our head in direction
 
         is_body_found = False
         is_apple_found = False
-        while self.is_valid(current_tile):
+        while self.is_inside_grid(current_tile):
             if not is_body_found and current_tile in self.body:
                 is_body_found = True
                 distance_to_body = total_distance
@@ -157,8 +162,6 @@ class Snake:
         tail_direction_array[self.possible_directions.index(self.current_tail_direction)] = 1
         input_array = np.append(input_array, tail_direction_array)
 
-        # input_array = np.concatenate(input_array)
-        print(input_array)
         return input_array
 
 
@@ -172,43 +175,48 @@ class Snake:
     def update(self):
         self.look()
         input_array = self.create_input_for_nn() # this should be snake vision + encoded direction of a head + encoded direction of a tail
+        print("Input array: " , input_array)
+        print("##############################")
         output = self.model(torch.tensor(input_array).float())
-        print(output)
+        self.new_direction = self.possible_directions[torch.argmax(output).item()]
 
     def move(self):
         if not self.is_alive:
             return
 
-        new_direction = self.possible_directions[
-            random.randint(0, 3)
-        ]  # Later change this not to be random
+        # new_direction = self.possible_directions[
+        #     random.randint(0, 3)
+        # ]  # Later change this not to be random
 
+        print("Current direcion: ", self.current_direction)
+        print("New direction: ", self.new_direction)
+        
         head = self.body[0]
-        match (new_direction):
+        match (self.new_direction):
             case "u":
                 if self.current_direction == "d":
                     new_position = Point(head.x, head.y + 1)
                 else:
                     new_position = Point(head.x, head.y - 1)
-                    self.current_direction = new_direction
+                    self.current_direction = self.new_direction
             case "r":
                 if self.current_direction == "l":
                     new_position = Point(head.x - 1, head.y)
                 else:
                     new_position = Point(head.x + 1, head.y)
-                    self.current_direction = new_direction
+                    self.current_direction = self.new_direction
             case "d":
                 if self.current_direction == "u":
                     new_position = Point(head.x, head.y - 1)
                 else:
                     new_position = Point(head.x, head.y + 1)
-                    self.current_direction = new_direction
+                    self.current_direction = self.new_direction
             case "l":
                 if self.current_direction == "r":
                     new_position = Point(head.x + 1, head.y)
                 else:
                     new_position = Point(head.x - 1, head.y)
-                    self.current_direction = new_direction
+                    self.current_direction = self.new_direction
             case _:
                 new_position = Point(1, 2)
 
