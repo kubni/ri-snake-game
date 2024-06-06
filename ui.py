@@ -50,7 +50,7 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def update_on_timeout(self):
-        if self.snake.is_alive: # Color the apple
+        if self.snake.is_alive:  # Color the apple
             label = QLabel()
             label.setStyleSheet("background-color: red;")
             self.grid.addWidget(label, self.snake.apple.y, self.snake.apple.x)
@@ -63,7 +63,9 @@ class MainWindow(QMainWindow):
 
             # Color old snake positions with gray:
             if self.old_body != None:
-                old_cells = list(filter(lambda p: p not in self.snake.body, self.old_body))
+                old_cells = list(
+                    filter(lambda p: p not in self.snake.body, self.old_body)
+                )
 
                 for p in old_cells:
                     label = QLabel()
@@ -76,9 +78,18 @@ class MainWindow(QMainWindow):
             self.snake.move()
             print("Snake moved")
         if not self.snake.is_alive:
-            # TODO: Show the end message
-            # sys.exit(1)
-            print("You lost the game")
+            # TODO: Get the model parameters and run them through genetic algorithms
+            print("MODEL PARAMETERS: \n")
+
+            weights_and_biases = []  # TODO: Are separate lists needed?
+            for param_tensor in self.snake.model.state_dict():
+                weights_and_biases.append(
+                    self.snake.model.state_dict()[param_tensor].clone()
+                )
+                print("PARAM_TENSOR: ", param_tensor)
+                print("CLONE: ", self.snake.model.state_dict()[param_tensor])
+
+            sys.exit(1)  # NOTE: Placeholder
 
 
 if __name__ == "__main__":

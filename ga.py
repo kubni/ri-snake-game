@@ -2,16 +2,20 @@
 from typing import Tuple
 import random
 
+from numpy import zeros
+from torch import tensor
+from neural_network import NeuralNetwork
+
 from snake import Snake
 
 
 class Population:
-    def __init__(self, population_size: int):
+    def __init__(self, population_size: int, board_size: Tuple[int, int]):
         self.population_size = population_size
         self.snakes = []
 
         for _ in range(self.population_size):
-            snake = Snake()  # TODO: Snake(grid_width, grid_height)
+            snake = Snake(board_size=board_size)
             self.snakes.append(snake)
 
     def get_best_individual_and_fitness(self) -> Tuple[Snake, float]:
@@ -37,15 +41,38 @@ def tournament_selection(population: Population, tournament_size: int) -> Snake:
     return max(pool, key=lambda s: s.fitness)
 
 
-def crossover(parent1, parent2) -> Tuple[Snake, Snake]:
-    split_pos = random.randrange(0, len(parent1.code))
+def crossover(
+    parent1: NeuralNetwork, parent2: NeuralNetwork
+) -> Tuple[NeuralNetwork, NeuralNetwork]:
 
-    child1 = Snake()
-    child2 = Snake()
-    child1.code[:split_pos] = parent1.code[:split_pos]
-    child1.code[split_pos:] = parent2.code[split_pos:]
-    child2.code[:split_pos] = parent2.code[:split_pos]
-    child2.code[split_pos:] = parent1.code[split_pos:]
+    # NOTE: WIP #
+    p1_params, p2_params = parent1.state_dict(), parent2.state_dict()
+
+    # NOTE: We can also try separate lists for weights and biases in the future maybe...
+    child1 = NeuralNetwork()
+    child2 = NeuralNetwork()
+    for param in p1_params:  # NOTE: Their layers and biases (params) have same names
+        p1_layer = p1_params[param]
+        p2_layer = p2_params[param]
+
+        p1_layer_flattened = p1_layer.flatten()
+        p2_layer_flattened = p2_layer.flatten()
+
+        # NOTE: For now, we are doing the simplest crossover possible: single point split
+        # TODO: We can do separate split points by row, or by columns, or completely different crossover algorithm in the future
+        split_pos = random.randrange(0, len(p1_layer_flattened))
+
+        tmp_child_1_layer = tensor(zeros(len(p1_layer_flattened)))
+        tmp_child_2_layer = tensor(zeros(len(p2_layer_flattened)))
+
+        tmp_child_1_layer[:split_pos] = p1_layer_flattened[:split_pos]
+        tmp_child_1_layer[split_pos:] = p2_layer_flattened[split_pos:]
+        tmp_child_2_layer[:split_pos] = p2_layer_flattened[:split_pos]
+        tmp_child_2_layer[split_pos:] = p1_layer_flattened[split_pos:]
+
+        # Unflatten the values to the original shape of the layer
+        child1.state_dict()[param] = tmp_child_1_layer.view_as(p1_layer)
+        child2.state_dict()[param] = tmp_child_2_layer.view_as(p2_layer)
 
     return (child1, child2)
 
