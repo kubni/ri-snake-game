@@ -80,24 +80,25 @@ class MainWindow(QMainWindow):
 
             self.old_body = copy.deepcopy(self.chosen_snake.body)  # TODO: copy?
 
-            #### TESTING ZONE ####
-            # Move the whole population
-            for s in self.population:
+        #### TESTING ZONE ####
+        # Move the whole population
+        # TODO: Should this be at the beginning?
+        for s in self.population:
+            if s.is_alive:
                 s.update()
                 s.move()
-            ######################
+        ######################
 
-        if not self.chosen_snake.is_alive:
-            # TODO: Get the model parameters and run them through genetic algorithms
-            print("MODEL PARAMETERS: \n")
+        # FIXME: Other snakes don't update if the one that we are drawing is dead.
 
-            weights_and_biases = []  # TODO: Are separate lists needed?
-            for param_tensor in self.chosen_snake.model.state_dict():
-                weights_and_biases.append(
-                    self.chosen_snake.model.state_dict()[param_tensor].clone()
-                )
-                print("PARAM_TENSOR: ", param_tensor)
-                print("CLONE: ", self.chosen_snake.model.state_dict()[param_tensor])
+        if self.population.is_dead():
+            print("The entire generation is dead. Goodbye cruel world...")
+            # Now that the whole generation is dead, we can manipulate the snakes.
+
+            # Necromancy
+            pop_weights_and_biases = self.population.extract_parameters()
+            print(type(pop_weights_and_biases))
+            # print(pop_weights_and_biases)
 
             sys.exit(1)  # NOTE: Placeholder
 

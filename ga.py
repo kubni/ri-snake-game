@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-from math import inf
-from typing import Tuple
+from typing import List, Tuple
+from torch import Tensor
 import random
 
 from numpy import zeros
-from torch import tensor
 from neural_network import NeuralNetwork
 
 from snake import Snake
@@ -42,6 +41,27 @@ class Population:
     # We don't follow the best snake, just a random snake from the population
     def get_random_snake(self) -> Snake:
         return self.snakes[random.randrange(0, self.population_size)]
+
+    def is_dead(self) -> bool:
+        test = [s.is_alive for s in self.snakes]
+        print(test)
+        return not any(
+            test
+        )  # not any <==> not (at least one True) <===> everything is False <===> They are all dead
+
+    def extract_parameters(self) -> List[List[Tensor]]:
+        pop_weights_and_biases = []
+        for s in self.snakes:
+            weights_and_biases = []
+            for param_tensor in s.model.state_dict():
+                weights_and_biases.append(s.model.state_dict()[param_tensor].clone())
+                # print("PARAM_TENSOR: ", param_tensor)
+                # print("CLONE: ", s.model.state_dict()[param_tensor])
+
+            print("Weights and biases:", weights_and_biases)
+            pop_weights_and_biases.append(weights_and_biases)
+
+        return pop_weights_and_biases
 
 
 def tournament_selection(population: Population, tournament_size: int) -> Snake:
