@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from ga import Population
+from ga import Population, crossover, tournament_selection
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
@@ -11,12 +11,15 @@ from PySide6.QtCore import Slot, QTimer
 
 import sys, copy
 
+from snake import Snake
+
 
 class MainWindow(QMainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
 
+        self.tournament_size = 5
         self.num_rows = 10
         self.num_columns = 10
 
@@ -93,12 +96,20 @@ class MainWindow(QMainWindow):
 
         if self.population.is_dead():
             print("The entire generation is dead. Goodbye cruel world...")
-            # Now that the whole generation is dead, we can manipulate the snakes.
 
             # Necromancy
-            pop_weights_and_biases = self.population.extract_parameters()
-            print(type(pop_weights_and_biases))
-            # print(pop_weights_and_biases)
+            # pop_weights_and_biases = self.population.extract_parameters()
+
+            parent1, parent2 = tournament_selection(
+                self.population, tournament_size=self.tournament_size, num_individuals=2
+            )
+
+            # TODO: Refactor crossover to accept and return a Snake instead of NeuralNetwork
+            child1_model, child2_model = crossover(parent1.model, parent2.model)
+            child1 = Snake(board_size=(self.num_rows, self.num_columns))
+            child2 = Snake(board_size=(self.num_rows, self.num_columns))
+            child1.model = child1_model
+            child2.model = child2_model
 
             sys.exit(1)  # NOTE: Placeholder
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 from typing import List, Tuple
-from torch import Tensor
 import random
 
 from numpy import zeros
+from torch import tensor
 from neural_network import NeuralNetwork
 
 from snake import Snake
@@ -49,24 +49,32 @@ class Population:
             test
         )  # not any <==> not (at least one True) <===> everything is False <===> They are all dead
 
-    def extract_parameters(self) -> List[List[Tensor]]:
-        pop_weights_and_biases = []
-        for s in self.snakes:
-            weights_and_biases = []
-            for param_tensor in s.model.state_dict():
-                weights_and_biases.append(s.model.state_dict()[param_tensor].clone())
-                # print("PARAM_TENSOR: ", param_tensor)
-                # print("CLONE: ", s.model.state_dict()[param_tensor])
+    # def extract_parameters(self) -> List[List[Tensor]]:
+    #     pop_weights_and_biases = []
+    #     for s in self.snakes:
+    #         weights_and_biases = []
+    #         for param_tensor in s.model.state_dict():
+    #             weights_and_biases.append(s.model.state_dict()[param_tensor].clone())
+    #             print("PARAM_TENSOR: ", param_tensor)
+    #             # print("CLONE: ", s.model.state_dict()[param_tensor])
+    #
+    #         # print("Weights and biases:", weights_and_biases)
+    #         pop_weights_and_biases.append(weights_and_biases)
+    #
+    #     return pop_weights_and_biases
 
-            print("Weights and biases:", weights_and_biases)
-            pop_weights_and_biases.append(weights_and_biases)
 
-        return pop_weights_and_biases
+def tournament_selection(
+    population: Population, tournament_size: int, num_individuals: int
+) -> List[Snake]:
+    # TODO: It is possible to get same snake every time, but it isn't too important in the long run.
 
+    selected_snakes = []
+    for _ in range(num_individuals):
+        pool = random.sample(population.snakes, tournament_size)
+        selected_snakes.append(max(pool, key=lambda s: s.fitness))
 
-def tournament_selection(population: Population, tournament_size: int) -> Snake:
-    pool = random.sample(population.snakes, tournament_size)
-    return max(pool, key=lambda s: s.fitness)
+    return selected_snakes
 
 
 def crossover(
