@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from snake import Snake
+from ga import Population
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
@@ -14,8 +14,6 @@ import sys, copy
 
 class MainWindow(QMainWindow):
 
-    # signal_snake_moved = Signal()
-
     def __init__(self):
         super(MainWindow, self).__init__()
 
@@ -23,7 +21,13 @@ class MainWindow(QMainWindow):
         self.num_columns = 10
 
         self.old_body = None  # NOTE: Placeholder
-        self.snake = Snake(board_size=(self.num_rows, self.num_columns))
+
+        self.population_size = 5
+        self.population = Population(
+            population_size=self.population_size,
+            board_size=(self.num_rows, self.num_columns),
+        )
+        self.chosen_snake = self.population.get_random_snake()
         self.grid = self.initialize_grid(self.num_rows, self.num_columns, "gray")
 
         timer = QTimer(self)
@@ -50,13 +54,15 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def update_on_timeout(self):
-        if self.snake.is_alive:  # Color the apple
+        if self.chosen_snake.is_alive:  # Color the apple
             label = QLabel()
             label.setStyleSheet("background-color: red;")
-            self.grid.addWidget(label, self.snake.apple.y, self.snake.apple.x)
+            self.grid.addWidget(
+                label, self.chosen_snake.apple.y, self.chosen_snake.apple.x
+            )
             # Color new snake positions with green:
             # TODO: Color only the new cell
-            for p in self.snake.body:
+            for p in self.chosen_snake.body:
                 label = QLabel()
                 label.setStyleSheet("background-color: green")
                 self.grid.addWidget(label, p.y, p.x)
@@ -64,7 +70,7 @@ class MainWindow(QMainWindow):
             # Color old snake positions with gray:
             if self.old_body != None:
                 old_cells = list(
-                    filter(lambda p: p not in self.snake.body, self.old_body)
+                    filter(lambda p: p not in self.chosen_snake.body, self.old_body)
                 )
 
                 for p in old_cells:
@@ -72,22 +78,26 @@ class MainWindow(QMainWindow):
                     label.setStyleSheet("background-color: blue")
                     self.grid.addWidget(label, p.y, p.x)
 
-            self.old_body = copy.deepcopy(self.snake.body)  # TODO: copy?
-            self.snake.update()
-            # TODO: Place this in if()
-            self.snake.move()
-            print("Snake moved")
-        if not self.snake.is_alive:
+            self.old_body = copy.deepcopy(self.chosen_snake.body)  # TODO: copy?
+
+            #### TESTING ZONE ####
+            # Move the whole population
+            for s in self.population:
+                s.update()
+                s.move()
+            ######################
+
+        if not self.chosen_snake.is_alive:
             # TODO: Get the model parameters and run them through genetic algorithms
             print("MODEL PARAMETERS: \n")
 
             weights_and_biases = []  # TODO: Are separate lists needed?
-            for param_tensor in self.snake.model.state_dict():
+            for param_tensor in self.chosen_snake.model.state_dict():
                 weights_and_biases.append(
-                    self.snake.model.state_dict()[param_tensor].clone()
+                    self.chosen_snake.model.state_dict()[param_tensor].clone()
                 )
                 print("PARAM_TENSOR: ", param_tensor)
-                print("CLONE: ", self.snake.model.state_dict()[param_tensor])
+                print("CLONE: ", self.chosen_snake.model.state_dict()[param_tensor])
 
             sys.exit(1)  # NOTE: Placeholder
 

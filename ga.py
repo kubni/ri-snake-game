@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from math import inf
 from typing import Tuple
 import random
 
@@ -18,6 +19,9 @@ class Population:
             snake = Snake(board_size=board_size)
             self.snakes.append(snake)
 
+    def __iter__(self):
+        return iter(self.snakes)
+
     def get_best_individual_and_fitness(self) -> Tuple[Snake, float]:
         best_snake = max(self.snakes, key=lambda s: s.fitness)
         return (best_snake, best_snake.fitness)
@@ -34,6 +38,10 @@ class Population:
 
     def get_avg_pop_fitness(self) -> float:
         return self.get_total_pop_fitness() / self.population_size
+
+    # We don't follow the best snake, just a random snake from the population
+    def get_random_snake(self) -> Snake:
+        return self.snakes[random.randrange(0, self.population_size)]
 
 
 def tournament_selection(population: Population, tournament_size: int) -> Snake:
