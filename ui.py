@@ -83,35 +83,45 @@ class MainWindow(QMainWindow):
 
             self.old_body = copy.deepcopy(self.chosen_snake.body)  # TODO: copy?
 
-        #### TESTING ZONE ####
         # Move the whole population
         # TODO: Should this be at the beginning?
         for s in self.population:
             if s.is_alive:
                 s.update()
                 s.move()
-        ######################
-
-        # FIXME: Other snakes don't update if the one that we are drawing is dead.
 
         if self.population.is_dead():
             print("The entire generation is dead. Goodbye cruel world...")
 
+            for s in self.population.snakes:
+                print(s.model.state_dict())
+
             # Necromancy
             # pop_weights_and_biases = self.population.extract_parameters()
 
-            parent1, parent2 = tournament_selection(
-                self.population, tournament_size=self.tournament_size, num_individuals=2
-            )
 
-            # TODO: Refactor crossover to accept and return a Snake instead of NeuralNetwork
-            child1_model, child2_model = crossover(parent1.model, parent2.model)
-            child1 = Snake(
-                board_size=(self.num_rows, self.num_columns), model=child1_model
-            )
-            child2 = Snake(
-                board_size=(self.num_rows, self.num_columns), model=child2_model
-            )
+            # FIXME: Snake's calculate_fitness() is not implemented
+            # parent1, parent2 = tournament_selection(
+            #     self.population, tournament_size=self.tournament_size, num_individuals=2
+            # )
+            #
+
+            # child1_model, child2_model = crossover(parent1.model, parent2.model)
+
+            # Mutation
+            # mutation(child1_model)
+            # mutation(child2_model)
+
+            # child1 = Snake(
+            #     board_size=(self.num_rows, self.num_columns), model=child1_model
+            # )
+            # child2 = Snake(
+            #     board_size=(self.num_rows, self.num_columns), model=child2_model
+            # )
+
+
+
+
 
             sys.exit(1)  # NOTE: Placeholder
 
@@ -123,3 +133,5 @@ if __name__ == "__main__":
     window.show()
 
     sys.exit(app.exec())
+
+

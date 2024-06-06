@@ -2,7 +2,7 @@
 from typing import List, Tuple
 import random
 
-from numpy import zeros
+import numpy as np
 from torch import tensor
 from neural_network import NeuralNetwork
 
@@ -84,8 +84,8 @@ def crossover(
         # TODO: We can do separate split points by row, or by columns, or completely different crossover algorithm in the future
         split_pos = random.randrange(0, len(p1_layer_flattened))
 
-        tmp_child_1_layer = tensor(zeros(len(p1_layer_flattened)))
-        tmp_child_2_layer = tensor(zeros(len(p2_layer_flattened)))
+        tmp_child_1_layer = tensor(np.zeros(len(p1_layer_flattened)))
+        tmp_child_2_layer = tensor(np.zeros(len(p2_layer_flattened)))
 
         tmp_child_1_layer[:split_pos] = p1_layer_flattened[:split_pos]
         tmp_child_1_layer[split_pos:] = p2_layer_flattened[split_pos:]
@@ -99,8 +99,14 @@ def crossover(
     return (child1, child2)
 
 
-def mutation(snake: Snake, mutation_probability: float):
-    code_len = len(snake.code)
-    for i in range(code_len):
-        if random.random() < mutation_probability:
-            snake.code[i] = -snake.code[i]  # NOTE: Placeholder
+def mutation(model: NeuralNetwork, mutation_probability: float):
+    params = model.state_dict()
+
+    for param in params:
+        flattened_layer = params[param].flatten()
+        for i, _ in enumerate(flattened_layer):
+            # If the mutation happens, the value becomes a random value from the [-1, 1] range
+            if random.random() < mutation_probability:
+                flattened_layer[i] = np.random.uniform(-1, 1)
+
+        model.state_dict()[param] = flattened_layer.view_as(params[param])
