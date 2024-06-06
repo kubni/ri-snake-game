@@ -49,20 +49,6 @@ class Population:
             test
         )  # not any <==> not (at least one True) <===> everything is False <===> They are all dead
 
-    # def extract_parameters(self) -> List[List[Tensor]]:
-    #     pop_weights_and_biases = []
-    #     for s in self.snakes:
-    #         weights_and_biases = []
-    #         for param_tensor in s.model.state_dict():
-    #             weights_and_biases.append(s.model.state_dict()[param_tensor].clone())
-    #             print("PARAM_TENSOR: ", param_tensor)
-    #             # print("CLONE: ", s.model.state_dict()[param_tensor])
-    #
-    #         # print("Weights and biases:", weights_and_biases)
-    #         pop_weights_and_biases.append(weights_and_biases)
-    #
-    #     return pop_weights_and_biases
-
 
 def tournament_selection(
     population: Population, tournament_size: int, num_individuals: int

@@ -106,10 +106,12 @@ class MainWindow(QMainWindow):
 
             # TODO: Refactor crossover to accept and return a Snake instead of NeuralNetwork
             child1_model, child2_model = crossover(parent1.model, parent2.model)
-            child1 = Snake(board_size=(self.num_rows, self.num_columns))
-            child2 = Snake(board_size=(self.num_rows, self.num_columns))
-            child1.model = child1_model
-            child2.model = child2_model
+            child1 = Snake(
+                board_size=(self.num_rows, self.num_columns), model=child1_model
+            )
+            child2 = Snake(
+                board_size=(self.num_rows, self.num_columns), model=child2_model
+            )
 
             sys.exit(1)  # NOTE: Placeholder
 

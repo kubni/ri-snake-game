@@ -27,18 +27,30 @@ class Vision:
         self.distance_to_wall = float(distance_to_wall)
         self.distance_to_body = float(distance_to_body)
 
+
 class Snake:
-    def __init__(self, board_size):
+    def __init__(self, board_size, model=None):
         self.board_size = board_size
         self.possible_directions = ["u", "r", "d", "l"]
         self.initial_length = 3
         self.score = 0
-        self.vision = [None for _ in range(8)] # snake can see in 8 directions (south, east , south-east ...)  
+        self.vision = [
+            None for _ in range(8)
+        ]  # snake can see in 8 directions (south, east , south-east ...)
         self.vision_steps = [
-            Point(-1, 0), Point(-1, -1), Point(0, -1), Point(1, -1),
-            Point(1, 0), Point(1, 1), Point(0, 1), Point(-1, 1)
-            ]
-        self.model = NeuralNetwork()
+            Point(-1, 0),
+            Point(-1, -1),
+            Point(0, -1),
+            Point(1, -1),
+            Point(1, 0),
+            Point(1, 1),
+            Point(0, 1),
+            Point(-1, 1),
+        ]
+        if model == None:
+            self.model = NeuralNetwork()
+        else:
+            self.model = model
         x = random.randint(2, board_size[0] - self.initial_length)
         y = random.randint(2, board_size[1] - self.initial_length)
         self.start_position = Point(x, y)
@@ -46,7 +58,7 @@ class Snake:
         print("Start direction: ", start_direction)
         self.initialize_snake_body(start_direction)
         self.current_direction = start_direction
-        self.current_tail_direction = start_direction 
+        self.current_tail_direction = start_direction
         self.generate_apple()
 
     def initialize_snake_body(self, start_direction):
@@ -98,7 +110,7 @@ class Snake:
         else:
             print("End game or error")
             return
-        
+
     def is_inside_grid(self, new_position):
         if (
             new_position.x < 0
@@ -107,7 +119,7 @@ class Snake:
             or new_position.y > self.board_size[1] - 1
         ):
             return False
-           
+
         return True
 
     def is_valid(self, new_position):
@@ -128,7 +140,7 @@ class Snake:
         current_tile = copy.deepcopy(self.body[0])
         current_tile.x += vision_step.x
         current_tile.y += vision_step.y
-        total_distance = 1 # first tile from our head in direction
+        total_distance = 1  # first tile from our head in direction
 
         is_body_found = False
         is_apple_found = False
@@ -147,26 +159,40 @@ class Snake:
 
         distance_to_wall = 1 / total_distance
         distance_to_apple = 1 if distance_to_apple != -1 else 0
-        distance_to_body = 1 if distance_to_body != -1 else 0 
-        
-        vision_in_direction = Vision(distance_to_apple, distance_to_wall, distance_to_body)
+        distance_to_body = 1 if distance_to_body != -1 else 0
+
+        vision_in_direction = Vision(
+            distance_to_apple, distance_to_wall, distance_to_body
+        )
         return vision_in_direction
-    
+
     def create_input_for_nn(self):
-        input_array = np.array(list(map(lambda x: [x.distance_to_apple, x.distance_to_wall, x.distance_to_body] ,self.vision)))
-        
+        input_array = np.array(
+            list(
+                map(
+                    lambda x: [
+                        x.distance_to_apple,
+                        x.distance_to_wall,
+                        x.distance_to_body,
+                    ],
+                    self.vision,
+                )
+            )
+        )
+
         snake_direction_array = [0 for _ in range(len(self.possible_directions))]
-        snake_direction_array[self.possible_directions.index(self.current_direction)] = 1 # array of directions when only one of them have value 1
+        snake_direction_array[
+            self.possible_directions.index(self.current_direction)
+        ] = 1  # array of directions when only one of them have value 1
         input_array = np.append(input_array, snake_direction_array)
 
         tail_direction_array = [0 for _ in range(len(self.possible_directions))]
-        tail_direction_array[self.possible_directions.index(self.current_tail_direction)] = 1
+        tail_direction_array[
+            self.possible_directions.index(self.current_tail_direction)
+        ] = 1
         input_array = np.append(input_array, tail_direction_array)
 
         return input_array
-
-
-
 
     def look(self):
         for i, vision_step in enumerate(self.vision_steps):
@@ -175,8 +201,10 @@ class Snake:
 
     def update(self):
         self.look()
-        input_array = self.create_input_for_nn() # this should be snake vision + encoded direction of a head + encoded direction of a tail
-        print("Input array: " , input_array)
+        input_array = (
+            self.create_input_for_nn()
+        )  # this should be snake vision + encoded direction of a head + encoded direction of a tail
+        print("Input array: ", input_array)
         print("##############################")
         output = self.model(torch.tensor(input_array).float())
         self.new_direction = self.possible_directions[torch.argmax(output).item()]
@@ -191,7 +219,7 @@ class Snake:
 
         print("Current direcion: ", self.current_direction)
         print("New direction: ", self.new_direction)
-        
+
         head = self.body[0]
         match (self.new_direction):
             case "u":
@@ -233,14 +261,14 @@ class Snake:
             p1 = self.body[-1]
             p2 = self.body[-2]
             difference = p2 - p1
-            if(difference.x > 0):
-                self.current_tail_direction = 'r'
-            elif(difference.x < 0):
-                self.current_tail_direction = 'l'
-            elif(difference.y > 0):
-                self.current_tail_direction = 'd'
-            elif(difference.y < 0):
-                self.current_tail_direction = 'u'
+            if difference.x > 0:
+                self.current_tail_direction = "r"
+            elif difference.x < 0:
+                self.current_tail_direction = "l"
+            elif difference.y > 0:
+                self.current_tail_direction = "d"
+            elif difference.y < 0:
+                self.current_tail_direction = "u"
 
         else:
             self.is_alive = False
