@@ -59,6 +59,16 @@ class MainWindow(QMainWindow):
                 grid.addWidget(label, i, j)
         return grid
 
+    def reset_grid(self, grid_color: str):
+        # TODO: Reset only the ones that are painted.
+        for i in range(0, self.num_rows):
+            for j in range(0, self.num_columns):
+                label = QLabel()
+                label.setStyleSheet(f"background-color: {grid_color}")
+                self.grid.addWidget(label, i, j)
+
+
+
 
     def create_new_population(self) -> Population:
         # NOTE: Here, initial snakes of the new population are pointlessly created, as they will be replaced with genetically modified children
@@ -92,6 +102,7 @@ class MainWindow(QMainWindow):
             new_population.snakes[i] = child1
             new_population.snakes[i+1] = child2
 
+        # Potentially clamp the new pop to the old pop size
         new_population.snakes = new_population.snakes[:old_pop_size]
 
         print('Old population: ')
@@ -142,9 +153,14 @@ class MainWindow(QMainWindow):
         if self.population.is_dead():
             print("The entire generation is dead. Goodbye cruel world...")
             self.population = self.create_new_population()
-            # self.chosen_snake = self.population.get_random_snake()
 
             # TODO: Pick a new chosen snake to draw
+            # TODO: Reset the grid
+            self.reset_grid('gray')
+            self.chosen_snake = self.population.get_random_snake()
+
+            # FIXME: This probably only resets the grid visually. Check if snake still gains score by passing cells that had apples before the reset.
+            # self.grid = self.initialize_grid(self.num_rows, self.num_columns, "gray")
             # sys.exit(1)  # NOTE: Placeholder
 
 
