@@ -26,7 +26,7 @@ class MainWindow(QMainWindow):
 
         self.old_body = None  # NOTE: Placeholder
 
-        self.population_size = 5
+        self.population_size = 6
         self.population = Population(
             population_size=self.population_size,
             board_size=(self.num_rows, self.num_columns),
@@ -55,6 +55,46 @@ class MainWindow(QMainWindow):
                 label.setStyleSheet(f"background-color: {grid_color}")
                 grid.addWidget(label, i, j)
         return grid
+
+
+    def create_new_population(self) -> Population:
+        # TODO: Elitism
+        # FIXME: Here, initial snakes of the new population are pointlessly created, as they will be replaced with genetically modified children
+        new_population = Population(population_size = len(self.population.snakes), board_size=(self.num_rows, self.num_columns));
+        num_of_genetic_procedures = int(len(self.population.snakes) / 2) # NOTE: len has to be even or we would have to add a bit more code (TODO)
+        for i in range(num_of_genetic_procedures):
+            parent1, parent2 = tournament_selection(
+                self.population, tournament_size=self.tournament_size, num_individuals=2
+            )
+
+            child1_model, child2_model = crossover(parent1.model, parent2.model)
+
+            # Mutation
+            mutation(child1_model, mutation_probability=self.mutation_prob)
+            mutation(child2_model, mutation_probability=self.mutation_prob)
+
+            child1 = Snake(
+                board_size=(self.num_rows, self.num_columns), model=child1_model
+            )
+            child2 = Snake(
+                board_size=(self.num_rows, self.num_columns), model=child2_model
+            )
+
+            new_population.snakes[i] = child1
+            new_population.snakes[i+1] = child2
+
+
+        # print("New_pop: ", new_population.snakes)
+
+        print('Old population: ')
+        for s in self.population.snakes:
+            print(s)
+
+        print('New population: ')
+        for s in new_population.snakes:
+            print(s)
+        return new_population
+
 
     @Slot()
     def update_on_timeout(self):
@@ -93,41 +133,10 @@ class MainWindow(QMainWindow):
 
         if self.population.is_dead():
             print("The entire generation is dead. Goodbye cruel world...")
+            self.population = self.create_new_population()
 
-            # for s in self.population.snakes:
-            #     print(s.model.state_dict())
-
-            # Necromancy
-            parent1, parent2 = tournament_selection(
-                self.population, tournament_size=self.tournament_size, num_individuals=2
-            )
-
-            child1_model, child2_model = crossover(parent1.model, parent2.model)
-
-            # Mutation
-            mutation(child1_model, mutation_probability=self.mutation_prob)
-            mutation(child2_model, mutation_probability=self.mutation_prob)
-
-            print('Parent 1 model params: ', parent1.model.state_dict()['fc1.bias'])
-            print('Parent 2 model params: ', parent2.model.state_dict()['fc1.bias'])
-
-            print('Child 1 model params: ', child1_model.state_dict()['fc1.bias'])
-            print('Child 2 model params: ', child2_model.state_dict()['fc1.bias'])
-
-
-
-            child1 = Snake(
-                board_size=(self.num_rows, self.num_columns), model=child1_model
-            )
-            child2 = Snake(
-                board_size=(self.num_rows, self.num_columns), model=child2_model
-            )
-
-
-
-
-
-            sys.exit(1)  # NOTE: Placeholder
+            # TODO: Pick a new chosen snake to draw
+            # sys.exit(1)  # NOTE: Placeholder
 
 
 if __name__ == "__main__":
