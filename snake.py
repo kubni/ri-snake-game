@@ -34,6 +34,9 @@ class Snake:
         self.possible_directions = ["u", "r", "d", "l"]
         self.initial_length = 3
         self.score = 0
+        self.fitness = 0
+        self.steps = 0
+        self.steps_since_last_apple = 0
         self.vision = [
             None for _ in range(8)
         ]  # snake can see in 8 directions (south, east , south-east ...)
@@ -95,6 +98,11 @@ class Snake:
             snake_body
         )  # for easier adding and removing from both ends of the snake
         self.is_alive = True
+
+
+    def calculate_fitness(self):
+        self.fitness = self.steps + 2**self.score - 0.25*self.steps # encourage early exploration, more apple = better and we want it to be efficient with movement
+        self.fitness = max(self.fitness, 0)
 
     def generate_apple(self):
         width = self.board_size[0]
@@ -253,11 +261,14 @@ class Snake:
             if new_position == self.apple:
                 self.body.appendleft(new_position)  # new head
                 self.score += 1
+                self.steps_since_last_apple = 0
                 self.generate_apple()
             else:
+                self.steps_since_last_apple += 1
                 self.body.pop()  # remove tail
                 self.body.appendleft(new_position)
 
+            self.steps += 1
             p1 = self.body[-1]
             p2 = self.body[-2]
             difference = p2 - p1
