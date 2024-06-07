@@ -104,6 +104,7 @@ class MainWindow(QMainWindow):
 
         # Potentially clamp the new pop to the old pop size
         new_population.snakes = new_population.snakes[:old_pop_size]
+        new_population.population_size = len(new_population.snakes)
 
         print('Old population: ')
         for s in self.population.snakes:
@@ -157,10 +158,10 @@ class MainWindow(QMainWindow):
             # TODO: Pick a new chosen snake to draw
             # TODO: Reset the grid
             self.reset_grid('gray')
-            self.chosen_snake = self.population.get_random_snake()
+            self.old_body = None
+            self.chosen_snake = self.population.get_random_snake() # FIXME: Fails occasionally due to index out of range
 
             # FIXME: This probably only resets the grid visually. Check if snake still gains score by passing cells that had apples before the reset.
-            # self.grid = self.initialize_grid(self.num_rows, self.num_columns, "gray")
             # sys.exit(1)  # NOTE: Placeholder
 
 
