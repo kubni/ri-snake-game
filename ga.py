@@ -73,6 +73,10 @@ def crossover(
     # NOTE: We can also try separate lists for weights and biases in the future maybe...
     child1 = NeuralNetwork()
     child2 = NeuralNetwork()
+
+    child1_params = child1.state_dict()
+    child2_params = child2.state_dict()
+
     for param in p1_params:  # NOTE: Their layers and biases (params) have same names
         p1_layer = p1_params[param]
         p2_layer = p2_params[param]
@@ -80,8 +84,6 @@ def crossover(
         p1_layer_flattened = p1_layer.flatten()
         p2_layer_flattened = p2_layer.flatten()
 
-        print("P1_layer: ", p1_layer)
-        print("P1_layer_flattened: ", p1_layer_flattened)
         # NOTE: For now, we are doing the simplest crossover possible: single point split
         # TODO: We can do separate split points by row, or by columns, or completely different crossover algorithm in the future
         split_pos = random.randrange(0, len(p1_layer_flattened))
@@ -95,20 +97,13 @@ def crossover(
         tmp_child_2_layer[split_pos:] = p1_layer_flattened[split_pos:]
 
 
-        print("########## CROSSOVER ################")
-        print("Split pos: ", split_pos);
-        print("p1_layer_flattened: ", p1_layer_flattened)
-        print("p2_layer_flattened: ", p2_layer_flattened)
-        print("tmp_child_1_layer: ", tmp_child_1_layer)
-        print("tmp_child_2_layer: ", tmp_child_2_layer)
-        print("#####################################")
-
-
         # Unflatten the values to the original shape of the layer
-        child1.state_dict()[param] = tmp_child_1_layer.view_as(p1_layer)
-        child2.state_dict()[param] = tmp_child_2_layer.view_as(p2_layer)
+        child1_params[param] = tmp_child_1_layer.view_as(p1_layer)
+        child2_params[param] = tmp_child_2_layer.view_as(p2_layer)
 
-
+    # Change the state dict
+    child1.load_state_dict(child1_params)
+    child2.load_state_dict(child2_params)
 
 
     return (child1, child2)
@@ -124,4 +119,7 @@ def mutation(model: NeuralNetwork, mutation_probability: float):
             if random.random() < mutation_probability:
                 flattened_layer[i] = np.random.uniform(-1, 1)
 
-        model.state_dict()[param] = flattened_layer.view_as(params[param])
+        params[param] = flattened_layer.view_as(params[param])
+
+    # We can't directly do model.state_dict()[param] =, instead we have to use load_state_dict
+    model.load_state_dict(params)

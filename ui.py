@@ -19,6 +19,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
+        self.mutation_prob = 0.05
         self.tournament_size = 5
         self.num_rows = 10
         self.num_columns = 10
@@ -97,35 +98,30 @@ class MainWindow(QMainWindow):
             #     print(s.model.state_dict())
 
             # Necromancy
-            # FIXME: Snake's calculate_fitness() is not implemented
             parent1, parent2 = tournament_selection(
                 self.population, tournament_size=self.tournament_size, num_individuals=2
             )
 
-
             child1_model, child2_model = crossover(parent1.model, parent2.model)
 
             # Mutation
-            # mutation(child1_model, mutation_probability=0.05)
-            # mutation(child2_model, mutation_probability=0.05)
-
-
+            mutation(child1_model, mutation_probability=self.mutation_prob)
+            mutation(child2_model, mutation_probability=self.mutation_prob)
 
             print('Parent 1 model params: ', parent1.model.state_dict()['fc1.bias'])
             print('Parent 2 model params: ', parent2.model.state_dict()['fc1.bias'])
-
 
             print('Child 1 model params: ', child1_model.state_dict()['fc1.bias'])
             print('Child 2 model params: ', child2_model.state_dict()['fc1.bias'])
 
 
 
-            # child1 = Snake(
-            #     board_size=(self.num_rows, self.num_columns), model=child1_model
-            # )
-            # child2 = Snake(
-            #     board_size=(self.num_rows, self.num_columns), model=child2_model
-            # )
+            child1 = Snake(
+                board_size=(self.num_rows, self.num_columns), model=child1_model
+            )
+            child2 = Snake(
+                board_size=(self.num_rows, self.num_columns), model=child2_model
+            )
 
 
 
