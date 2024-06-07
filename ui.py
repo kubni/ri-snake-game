@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from math import ceil
 from ga import Population, crossover, mutation, tournament_selection
 from PySide6.QtWidgets import (
     QApplication,
@@ -26,13 +27,15 @@ class MainWindow(QMainWindow):
 
         self.old_body = None  # NOTE: Placeholder
 
-        self.population_size = 6
+        self.population_size = 5
         self.population = Population(
             population_size=self.population_size,
             board_size=(self.num_rows, self.num_columns),
         )
         self.chosen_snake = self.population.get_random_snake()
         self.grid = self.initialize_grid(self.num_rows, self.num_columns, "gray")
+
+        self.elitism_size = ceil(0.30 * self.population_size)
 
         timer = QTimer(self)
         timer.timeout.connect(self.update_on_timeout)
@@ -58,10 +61,15 @@ class MainWindow(QMainWindow):
 
 
     def create_new_population(self) -> Population:
-        # TODO: Elitism
-        # FIXME: Here, initial snakes of the new population are pointlessly created, as they will be replaced with genetically modified children
-        new_population = Population(population_size = len(self.population.snakes), board_size=(self.num_rows, self.num_columns));
-        num_of_genetic_procedures = int(len(self.population.snakes) / 2) # NOTE: len has to be even or we would have to add a bit more code (TODO)
+        # NOTE: Here, initial snakes of the new population are pointlessly created, as they will be replaced with genetically modified children
+        old_pop_size = len(self.population.snakes)
+        num_of_genetic_procedures = ceil(old_pop_size / 2)
+
+        # NOTE: If the length of population was odd, the number of genetic procedures will produce 1 snake more than we need.
+        #       We don't need this extra snake, so we will let the procedures finish, and then clamp the new population to the old population's size.
+        new_pop_size = old_pop_size if old_pop_size % 2 == 0 else old_pop_size + 1
+        new_population = Population(population_size=new_pop_size, board_size=(self.num_rows, self.num_columns));
+
         for i in range(num_of_genetic_procedures):
             parent1, parent2 = tournament_selection(
                 self.population, tournament_size=self.tournament_size, num_individuals=2
@@ -80,11 +88,11 @@ class MainWindow(QMainWindow):
                 board_size=(self.num_rows, self.num_columns), model=child2_model
             )
 
+
             new_population.snakes[i] = child1
             new_population.snakes[i+1] = child2
 
-
-        # print("New_pop: ", new_population.snakes)
+        new_population.snakes = new_population.snakes[:old_pop_size]
 
         print('Old population: ')
         for s in self.population.snakes:
@@ -134,6 +142,7 @@ class MainWindow(QMainWindow):
         if self.population.is_dead():
             print("The entire generation is dead. Goodbye cruel world...")
             self.population = self.create_new_population()
+            # self.chosen_snake = self.population.get_random_snake()
 
             # TODO: Pick a new chosen snake to draw
             # sys.exit(1)  # NOTE: Placeholder
