@@ -80,6 +80,8 @@ def crossover(
         p1_layer_flattened = p1_layer.flatten()
         p2_layer_flattened = p2_layer.flatten()
 
+        print("P1_layer: ", p1_layer)
+        print("P1_layer_flattened: ", p1_layer_flattened)
         # NOTE: For now, we are doing the simplest crossover possible: single point split
         # TODO: We can do separate split points by row, or by columns, or completely different crossover algorithm in the future
         split_pos = random.randrange(0, len(p1_layer_flattened))
@@ -92,9 +94,22 @@ def crossover(
         tmp_child_2_layer[:split_pos] = p2_layer_flattened[:split_pos]
         tmp_child_2_layer[split_pos:] = p1_layer_flattened[split_pos:]
 
+
+        print("########## CROSSOVER ################")
+        print("Split pos: ", split_pos);
+        print("p1_layer_flattened: ", p1_layer_flattened)
+        print("p2_layer_flattened: ", p2_layer_flattened)
+        print("tmp_child_1_layer: ", tmp_child_1_layer)
+        print("tmp_child_2_layer: ", tmp_child_2_layer)
+        print("#####################################")
+
+
         # Unflatten the values to the original shape of the layer
         child1.state_dict()[param] = tmp_child_1_layer.view_as(p1_layer)
         child2.state_dict()[param] = tmp_child_2_layer.view_as(p2_layer)
+
+
+
 
     return (child1, child2)
 

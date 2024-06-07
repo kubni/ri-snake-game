@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from ga import Population, crossover, tournament_selection
+from ga import Population, crossover, mutation, tournament_selection
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
@@ -93,24 +93,32 @@ class MainWindow(QMainWindow):
         if self.population.is_dead():
             print("The entire generation is dead. Goodbye cruel world...")
 
-            for s in self.population.snakes:
-                print(s.model.state_dict())
+            # for s in self.population.snakes:
+            #     print(s.model.state_dict())
 
             # Necromancy
-            # pop_weights_and_biases = self.population.extract_parameters()
-
-
             # FIXME: Snake's calculate_fitness() is not implemented
-            # parent1, parent2 = tournament_selection(
-            #     self.population, tournament_size=self.tournament_size, num_individuals=2
-            # )
-            #
+            parent1, parent2 = tournament_selection(
+                self.population, tournament_size=self.tournament_size, num_individuals=2
+            )
 
-            # child1_model, child2_model = crossover(parent1.model, parent2.model)
+
+            child1_model, child2_model = crossover(parent1.model, parent2.model)
 
             # Mutation
-            # mutation(child1_model)
-            # mutation(child2_model)
+            # mutation(child1_model, mutation_probability=0.05)
+            # mutation(child2_model, mutation_probability=0.05)
+
+
+
+            print('Parent 1 model params: ', parent1.model.state_dict()['fc1.bias'])
+            print('Parent 2 model params: ', parent2.model.state_dict()['fc1.bias'])
+
+
+            print('Child 1 model params: ', child1_model.state_dict()['fc1.bias'])
+            print('Child 2 model params: ', child2_model.state_dict()['fc1.bias'])
+
+
 
             # child1 = Snake(
             #     board_size=(self.num_rows, self.num_columns), model=child1_model
