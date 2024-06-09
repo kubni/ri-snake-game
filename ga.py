@@ -25,6 +25,13 @@ class Population:
         best_snake = max(self.snakes, key=lambda s: s.fitness)
         return (best_snake, best_snake.fitness)
 
+    def get_best_n_snakes(self, n: int) -> List[Snake]:
+        sorted_snakes = sorted(self.snakes, key=lambda s: s.fitness, reverse=True)
+        # print("Sorted snakes: ")
+        # for s in sorted_snakes:
+        #     print(s, s.fitness)
+        return sorted_snakes[:n]
+
     def calculate_fitness(self):
         for s in self.snakes:
             s.calculate_fitness()
@@ -43,11 +50,7 @@ class Population:
         return self.snakes[random.randrange(0, self.population_size)]
 
     def is_dead(self) -> bool:
-        test = [s.is_alive for s in self.snakes]
-        print(test)
-        return not any(
-            test
-        )  # not any <==> not (at least one True) <===> everything is False <===> They are all dead
+        return not any([s.is_alive for s in self.snakes])
 
 
 def tournament_selection(

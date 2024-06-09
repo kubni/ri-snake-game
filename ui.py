@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from math import ceil
+from math import ceil, inf
 from ga import Population, crossover, mutation, tournament_selection
 from PySide6.QtWidgets import (
     QApplication,
@@ -20,14 +20,15 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
+        self.best_fitness = -inf
+        self.generation_counter = 1;
         self.mutation_prob = 0.05
         self.tournament_size = 5
         self.num_rows = 10
         self.num_columns = 10
-
         self.old_body = None  # NOTE: Placeholder
 
-        self.population_size = 5
+        self.population_size = 100
         self.population = Population(
             population_size=self.population_size,
             board_size=(self.num_rows, self.num_columns),
@@ -37,9 +38,10 @@ class MainWindow(QMainWindow):
 
         self.elitism_size = ceil(0.30 * self.population_size)
 
+        self.num_of_genetic_procedures = ceil((self.population_size - self.elitism_size) / 2)
         timer = QTimer(self)
         timer.timeout.connect(self.update_on_timeout)
-        timer.start(250)
+        timer.start(50)
 
         widget = QWidget()
         widget.setLayout(self.grid)
@@ -73,14 +75,19 @@ class MainWindow(QMainWindow):
     def create_new_population(self) -> Population:
         # NOTE: Here, initial snakes of the new population are pointlessly created, as they will be replaced with genetically modified children
         old_pop_size = len(self.population.snakes)
-        num_of_genetic_procedures = ceil(old_pop_size / 2)
 
         # NOTE: If the length of population was odd, the number of genetic procedures will produce 1 snake more than we need.
         #       We don't need this extra snake, so we will let the procedures finish, and then clamp the new population to the old population's size.
         new_pop_size = old_pop_size if old_pop_size % 2 == 0 else old_pop_size + 1
         new_population = Population(population_size=new_pop_size, board_size=(self.num_rows, self.num_columns));
 
-        for i in range(num_of_genetic_procedures):
+
+        # Elitism
+        print('Elitism size: ', self.elitism_size)
+        new_population.snakes[:self.elitism_size] = self.population.get_best_n_snakes(n=self.elitism_size)
+
+        # Standard genetic procedures
+        for i in range(self.num_of_genetic_procedures):
             parent1, parent2 = tournament_selection(
                 self.population, tournament_size=self.tournament_size, num_individuals=2
             )
@@ -99,8 +106,8 @@ class MainWindow(QMainWindow):
             )
 
 
-            new_population.snakes[i] = child1
-            new_population.snakes[i+1] = child2
+            new_population.snakes[self.elitism_size + i] = child1
+            new_population.snakes[self.elitism_size + i + 1] = child2
 
         # Potentially clamp the new pop to the old pop size
         new_population.snakes = new_population.snakes[:old_pop_size]
@@ -139,7 +146,7 @@ class MainWindow(QMainWindow):
 
                 for p in old_cells:
                     label = QLabel()
-                    label.setStyleSheet("background-color: blue")
+                    label.setStyleSheet("background-color: gray")
                     self.grid.addWidget(label, p.y, p.x)
 
             self.old_body = copy.deepcopy(self.chosen_snake.body)  # TODO: copy?
@@ -153,15 +160,26 @@ class MainWindow(QMainWindow):
 
         if self.population.is_dead():
             print("The entire generation is dead. Goodbye cruel world...")
-            self.population = self.create_new_population()
+            self.population.calculate_fitness()
 
-            # TODO: Pick a new chosen snake to draw
-            # TODO: Reset the grid
+            print(f"#### Data for generation #{self.generation_counter} ####")
+            best_fitness_in_generation = self.population.get_best_individual_and_fitness()[1]
+            if best_fitness_in_generation > self.best_fitness:
+                self.best_fitness = best_fitness_in_generation
+            print("Average generation fitness :", self.population.get_avg_pop_fitness())
+            print("Best individual fitness in generation: ", best_fitness_in_generation)
+            print("#########################################################")
+            print("Best ever individual fitness: ", self.best_fitness)
+
+
+            if self.generation_counter == 200:
+                sys.exit(1)
+            self.population = self.create_new_population()
+            self.generation_counter += 1;
+
             self.reset_grid('gray')
             self.old_body = None
-            self.chosen_snake = self.population.get_random_snake() # FIXME: Fails occasionally due to index out of range
-
-            # FIXME: This probably only resets the grid visually. Check if snake still gains score by passing cells that had apples before the reset.
+            self.chosen_snake = self.population.get_random_snake()
             # sys.exit(1)  # NOTE: Placeholder
 
 

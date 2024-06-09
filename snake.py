@@ -58,7 +58,6 @@ class Snake:
         y = random.randint(2, board_size[1] - self.initial_length)
         self.start_position = Point(x, y)
         start_direction = self.possible_directions[random.randint(0, 3)]
-        print("Start direction: ", start_direction)
         self.initialize_snake_body(start_direction)
         self.current_direction = start_direction
         self.current_tail_direction = start_direction
@@ -212,21 +211,12 @@ class Snake:
         input_array = (
             self.create_input_for_nn()
         )  # this should be snake vision + encoded direction of a head + encoded direction of a tail
-        print("Input array: ", input_array)
-        print("##############################")
         output = self.model(torch.tensor(input_array).float())
         self.new_direction = self.possible_directions[torch.argmax(output).item()]
 
     def move(self):
         if not self.is_alive:
             return
-
-        # new_direction = self.possible_directions[
-        #     random.randint(0, 3)
-        # ]  # Later change this not to be random
-
-        print("Current direcion: ", self.current_direction)
-        print("New direction: ", self.new_direction)
 
         head = self.body[0]
         match (self.new_direction):
@@ -287,4 +277,4 @@ class Snake:
         return
 
     def __str__(self):
-        return f"Body: {list(map(str, self.body))}"
+        return f"Body: {list(map(str, self.body))}, Fitness: {self.fitness}"
