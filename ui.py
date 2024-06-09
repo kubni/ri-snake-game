@@ -22,6 +22,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
 
         self.best_fitness = -inf
+        self.best_score = 0
         self.generation_counter = 1;
         self.mutation_prob = 0.05
         self.tournament_size = 5
@@ -29,7 +30,7 @@ class MainWindow(QMainWindow):
         self.num_columns = 10
         self.old_body = None  # NOTE: Placeholder
 
-        self.population_size = 100
+        self.population_size = 500
         self.population = Population(
             population_size=self.population_size,
             board_size=(self.num_rows, self.num_columns),
@@ -43,7 +44,7 @@ class MainWindow(QMainWindow):
         self.num_of_genetic_procedures = ceil((self.population_size - self.elitism_size) / 2)
         timer = QTimer(self)
         timer.timeout.connect(self.update_on_timeout)
-        timer.start(50)
+        timer.start(100)
 
         widget = QWidget()
         widget.setLayout(self.grid)
@@ -83,7 +84,7 @@ class MainWindow(QMainWindow):
         # Create the elite snakes by using best snake minds
         elite_snakes = []
         for i in range(self.elitism_size):
-            elite_snakes.append(Snake(board_size=(self.num_rows, self.num_columns), model=snake_minds[i]))
+            elite_snakes.append(Snake(board_size=(self.num_rows, self.num_columns), model=copy.deepcopy(snake_minds[i])))
 
         return elite_snakes
 
@@ -95,7 +96,6 @@ class MainWindow(QMainWindow):
         #       We don't need this extra snake, so we will let the procedures finish, and then clamp the new population to the old population's size.
         new_pop_size = old_pop_size if old_pop_size % 2 == 0 else old_pop_size + 1
         new_population = Population(population_size=new_pop_size, board_size=(self.num_rows, self.num_columns));
-
 
         # Elitism
         elite_snakes = self.elitism()
@@ -120,21 +120,12 @@ class MainWindow(QMainWindow):
                 board_size=(self.num_rows, self.num_columns), model=child2_model
             )
 
-
             new_population.snakes[self.elitism_size + i] = child1
             new_population.snakes[self.elitism_size + i + 1] = child2
 
         # Potentially clamp the new pop to the old pop size
         new_population.snakes = new_population.snakes[:old_pop_size]
         new_population.population_size = len(new_population.snakes)
-
-        # print('Old population: ')
-        # for s in self.population.snakes:
-        #     print(s)
-
-        # print('New population: ')
-        # for s in new_population.snakes:
-        #     print(s)
         return new_population
 
 
@@ -178,13 +169,18 @@ class MainWindow(QMainWindow):
             self.population.calculate_fitness()
 
             print(f"#### Data for generation #{self.generation_counter} ####")
-            best_fitness_in_generation = self.population.get_best_individual_and_fitness()[1]
+            best_individual_in_generation, best_fitness_in_generation = self.population.get_best_individual_and_fitness()
             if best_fitness_in_generation > self.best_fitness:
                 self.best_fitness = best_fitness_in_generation
+            if best_individual_in_generation.score > self.best_score:
+                self.best_score = best_individual_in_generation.score
             print("Average generation fitness :", self.population.get_avg_pop_fitness())
             print("Best individual fitness in generation: ", best_fitness_in_generation)
-            print("#########################################################")
+            print("Best individual's score: ", best_individual_in_generation.score)
+            print("#################### Global stats #######################")
             print("Best ever individual fitness: ", self.best_fitness)
+            print("Best ever score: ", self.best_score)
+            print("#########################################################")
 
 
             if self.generation_counter == 200:
@@ -195,7 +191,7 @@ class MainWindow(QMainWindow):
             self.reset_grid('gray')
             self.old_body = None
             # self.chosen_snake = self.population.get_random_snake()
-            self.chosen_snake = self.population.snakes[0]  #FIXME: Makes the snake not render on screen
+            self.chosen_snake = self.population.snakes[0]
             # sys.exit(1)  # NOTE: Placeholder
 
 
