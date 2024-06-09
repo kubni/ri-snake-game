@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from math import ceil, inf
+from typing import List
 from ga import Population, crossover, mutation, tournament_selection
 from PySide6.QtWidgets import (
     QApplication,
@@ -34,6 +35,7 @@ class MainWindow(QMainWindow):
             board_size=(self.num_rows, self.num_columns),
         )
         self.chosen_snake = self.population.get_random_snake()
+        # self.chosen_snake = self.population.snakes[0]
         self.grid = self.initialize_grid(self.num_rows, self.num_columns, "gray")
 
         self.elitism_size = ceil(0.30 * self.population_size)
@@ -72,6 +74,19 @@ class MainWindow(QMainWindow):
 
 
 
+    # Elitism doesn't save the Snakes, but instead their NeuralNetworks and puts them inside of new Snakes
+    def elitism(self) -> List[Snake]:
+
+        # Extract the NeuralNetworks out of best snakes from current generation:
+        snake_minds = self.population.get_best_n_models(self.elitism_size)
+
+        # Create the elite snakes by using best snake minds
+        elite_snakes = []
+        for i in range(self.elitism_size):
+            elite_snakes.append(Snake(board_size=(self.num_rows, self.num_columns), model=snake_minds[i]))
+
+        return elite_snakes
+
     def create_new_population(self) -> Population:
         # NOTE: Here, initial snakes of the new population are pointlessly created, as they will be replaced with genetically modified children
         old_pop_size = len(self.population.snakes)
@@ -83,8 +98,8 @@ class MainWindow(QMainWindow):
 
 
         # Elitism
-        print('Elitism size: ', self.elitism_size)
-        new_population.snakes[:self.elitism_size] = self.population.get_best_n_snakes(n=self.elitism_size)
+        elite_snakes = self.elitism()
+        new_population.snakes[:self.elitism_size] = elite_snakes
 
         # Standard genetic procedures
         for i in range(self.num_of_genetic_procedures):
@@ -113,13 +128,13 @@ class MainWindow(QMainWindow):
         new_population.snakes = new_population.snakes[:old_pop_size]
         new_population.population_size = len(new_population.snakes)
 
-        print('Old population: ')
-        for s in self.population.snakes:
-            print(s)
+        # print('Old population: ')
+        # for s in self.population.snakes:
+        #     print(s)
 
-        print('New population: ')
-        for s in new_population.snakes:
-            print(s)
+        # print('New population: ')
+        # for s in new_population.snakes:
+        #     print(s)
         return new_population
 
 
@@ -179,7 +194,8 @@ class MainWindow(QMainWindow):
 
             self.reset_grid('gray')
             self.old_body = None
-            self.chosen_snake = self.population.get_random_snake()
+            # self.chosen_snake = self.population.get_random_snake()
+            self.chosen_snake = self.population.snakes[0]  #FIXME: Makes the snake not render on screen
             # sys.exit(1)  # NOTE: Placeholder
 
 
