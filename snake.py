@@ -280,6 +280,9 @@ class Snake:
                 self.current_tail_direction = "d"
             elif difference.y < 0:
                 self.current_tail_direction = "u"
+            
+            if self.steps_since_last_apple >= 100:
+                self.is_alive = False #snake is probably in the loop
 
         else:
             self.is_alive = False
