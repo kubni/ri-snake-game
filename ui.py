@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from math import ceil, inf
 from typing import List
-from ga import Population, crossover, mutation, tournament_selection
+from ga import Population, crossover_no_flatten, mutation, tournament_selection
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
@@ -44,7 +44,7 @@ class MainWindow(QMainWindow):
         self.num_of_genetic_procedures = ceil((self.population_size - self.elitism_size) / 2)
         timer = QTimer(self)
         timer.timeout.connect(self.update_on_timeout)
-        timer.start(100)
+        timer.start(50)
 
         widget = QWidget()
         widget.setLayout(self.grid)
@@ -107,7 +107,9 @@ class MainWindow(QMainWindow):
                 self.population, tournament_size=self.tournament_size, num_individuals=2
             )
 
-            child1_model, child2_model = crossover(parent1.model, parent2.model)
+            # child1_model, child2_model = crossover(parent1.model, parent2.model)
+            # child1_model, child2_model = crossover2(parent1.model, parent2.model)
+            child1_model, child2_model = crossover_no_flatten(parent1.model, parent2.model)
 
             # Mutation
             mutation(child1_model, mutation_probability=self.mutation_prob)

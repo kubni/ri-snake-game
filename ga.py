@@ -3,7 +3,7 @@ from typing import List, Tuple
 import random
 
 import numpy as np
-from torch import tensor
+from torch import tensor, stack, zeros
 from neural_network import NeuralNetwork
 
 from snake import Snake
@@ -66,17 +66,63 @@ def tournament_selection(
     return selected_snakes
 
 
-def crossover(
+# def crossover(
+#     parent1: NeuralNetwork, parent2: NeuralNetwork
+# ) -> Tuple[NeuralNetwork, NeuralNetwork]:
+
+#     # NOTE: WIP #
+#     p1_params, p2_params = parent1.state_dict(), parent2.state_dict()
+
+#     # NOTE: We can also try separate lists for weights and biases in the future maybe...
+#     child1 = NeuralNetwork()
+#     child2 = NeuralNetwork()
+
+#     child1_params = child1.state_dict()
+#     child2_params = child2.state_dict()
+
+#     for param in p1_params:  # NOTE: Their layers and biases (params) have same names
+#         p1_layer = p1_params[param]
+#         p2_layer = p2_params[param]
+
+#         p1_layer_flattened = p1_layer.flatten()
+#         p2_layer_flattened = p2_layer.flatten()
+
+#         # NOTE: For now, we are doing the simplest crossover possible: single point split
+#         # TODO: We can do separate split points by row, or by columns, or completely different crossover algorithm in the future
+#         split_pos = random.randrange(0, len(p1_layer_flattened))
+
+#         tmp_child_1_layer = tensor(np.zeros(len(p1_layer_flattened)))
+#         tmp_child_2_layer = tensor(np.zeros(len(p2_layer_flattened)))
+
+#         tmp_child_1_layer[:split_pos] = p1_layer_flattened[:split_pos]
+#         tmp_child_1_layer[split_pos:] = p2_layer_flattened[split_pos:]
+#         tmp_child_2_layer[:split_pos] = p2_layer_flattened[:split_pos]
+#         tmp_child_2_layer[split_pos:] = p1_layer_flattened[split_pos:]
+
+
+#         # Unflatten the values to the original shape of the layer
+#         child1_params[param] = tmp_child_1_layer.view_as(p1_layer)
+#         child2_params[param] = tmp_child_2_layer.view_as(p2_layer)
+
+#     # Change the state dict
+#     child1.load_state_dict(child1_params)
+#     child2.load_state_dict(child2_params)
+
+
+#     return (child1, child2)
+
+
+
+# TODO: Separate weights and biases
+def crossover_no_flatten(
     parent1: NeuralNetwork, parent2: NeuralNetwork
 ) -> Tuple[NeuralNetwork, NeuralNetwork]:
 
-    # NOTE: WIP #
     p1_params, p2_params = parent1.state_dict(), parent2.state_dict()
 
     # NOTE: We can also try separate lists for weights and biases in the future maybe...
     child1 = NeuralNetwork()
     child2 = NeuralNetwork()
-
     child1_params = child1.state_dict()
     child2_params = child2.state_dict()
 
@@ -84,33 +130,89 @@ def crossover(
         p1_layer = p1_params[param]
         p2_layer = p2_params[param]
 
-        p1_layer_flattened = p1_layer.flatten()
-        p2_layer_flattened = p2_layer.flatten()
+        # Loop through the rows of the layer
+        n = -1;
+        if len(p1_layer.shape) == 1:
+            n = 1
+        else:
+            (n, _) = p1_layer.shape
+        child1_layer = []
+        child2_layer = []
+        for i in range(n):
 
-        # NOTE: For now, we are doing the simplest crossover possible: single point split
-        # TODO: We can do separate split points by row, or by columns, or completely different crossover algorithm in the future
-        split_pos = random.randrange(0, len(p1_layer_flattened))
+            # If we have a bias array, p1_row should be equal to it
+            # If we have a weights matrix, it should go through them
+            p1_row = tensor([])
+            p2_row = tensor([])
+            if n == 1:
+                p1_row = p1_layer
+                p2_row = p2_layer
+            else:
+                p1_row = p1_layer[i]
+                p2_row = p2_layer[i]
 
-        tmp_child_1_layer = tensor(np.zeros(len(p1_layer_flattened)))
-        tmp_child_2_layer = tensor(np.zeros(len(p2_layer_flattened)))
+            # We will split each row by its own split position.
+            split_pos = random.randrange(0, len(p1_row))
 
-        tmp_child_1_layer[:split_pos] = p1_layer_flattened[:split_pos]
-        tmp_child_1_layer[split_pos:] = p2_layer_flattened[split_pos:]
-        tmp_child_2_layer[:split_pos] = p2_layer_flattened[:split_pos]
-        tmp_child_2_layer[split_pos:] = p1_layer_flattened[split_pos:]
+            child1_row = zeros(len(p1_row))
+            child2_row = zeros(len(p2_row))
 
+            child1_row[:split_pos] = p1_row[:split_pos]
+            child1_row[split_pos:] = p2_row[split_pos:]
+            child2_row[:split_pos] = p2_row[:split_pos]
+            child2_row[split_pos:] = p1_row[split_pos:]
 
-        # Unflatten the values to the original shape of the layer
-        child1_params[param] = tmp_child_1_layer.view_as(p1_layer)
-        child2_params[param] = tmp_child_2_layer.view_as(p2_layer)
+            # Append the row to the matrix/layer
+
+            child1_layer.append(child1_row)
+            child2_layer.append(child2_row)
+
+        # We have a list of tensors, and we want a tensor matrix.
+        # Except that we don't want it if we have biases, which the load_state_dict expects to come with for example shape [20] and not [1, 20]
+        if param.endswith('.bias'):
+           # We don't need to create a tensor matrix from a list of tensors in this case, since we have only one row in this list, we can just interpret it as a simple tensor array
+           child1_params[param] = child1_layer[0]
+           child2_params[param] = child2_layer[0]
+        else:
+            child1_params[param] = stack(child1_layer)
+            child2_params[param] = stack(child2_layer)
 
     # Change the state dict
     child1.load_state_dict(child1_params)
     child2.load_state_dict(child2_params)
 
-
     return (child1, child2)
 
+# def crossover2(parent1: NeuralNetwork, parent2: NeuralNetwork) -> Tuple[NeuralNetwork, NeuralNetwork]:
+
+#     p1_params, p2_params = parent1.state_dict(), parent2.state_dict()
+
+#     child1, child2 = NeuralNetwork(), NeuralNetwork();
+#     child1_params, child2_params = child1.state_dict(), child2.state_dict()
+
+#     for param in p1_params:
+#         p1_layer = p1_params[param]
+#         p2_layer = p2_params[param]
+
+#         p1_layer_flattened = p1_layer.flatten()
+#         p2_layer_flattened = p2_layer.flatten()
+
+#         tmp_child_1_layer = np.zeros(len(p1_layer_flattened))
+#         tmp_child_2_layer = np.zeros(len(p2_layer_flattened))
+
+#         mask = np.random.uniform(0, 1, size=tmp_child_1_layer.shape)
+
+#         tmp_child_1_layer[mask > 0.5] = p1_layer_flattened[mask > 0.5]
+#         tmp_child_2_layer[mask > 0.5] = p2_layer_flattened[mask > 0.5]
+
+#         child1_params[param] = tensor(tmp_child_1_layer).view_as(p1_layer)
+#         child2_params[param] = tensor(tmp_child_2_layer).view_as(p2_layer)
+
+
+#     child1.load_state_dict(child1_params)
+#     child2.load_state_dict(child2_params)
+
+#     return (child1, child2)
 
 def mutation(model: NeuralNetwork, mutation_probability: float):
     params = model.state_dict()
