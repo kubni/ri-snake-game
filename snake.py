@@ -102,7 +102,7 @@ class Snake:
     def calculate_fitness(self):
         # self.fitness = self.steps + 2**self.score - 0.25*self.steps # encourage early exploration, more apple = better and we want it to be efficient with movement
         # self.fitness = max(self.fitness, 0)
-        self.fitness = (self.steps) + ((2**self.score) + (self.score**2.1)*500) - (((.25 * self.steps)**1.3) * (self.score**1.2))
+        # self.fitness = (self.steps) + ((2**self.score) + (self.score**2.1)*500) - (((.25 * self.steps)**1.3) * (self.score**1.2))
         self.fitness = max(self.fitness, 0)
 
     def generate_apple(self):

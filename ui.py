@@ -25,10 +25,10 @@ class MainWindow(QMainWindow):
         self.best_score = 0
         self.generation_counter = 1;
         self.mutation_prob = 0.05
-        self.tournament_size = 5
+        self.tournament_size = 128
         self.num_rows = 10
         self.num_columns = 10
-        self.old_body = None  # NOTE: Placeholder
+        self.old_body = None
 
         self.population_size = 500
         self.population = Population(
@@ -36,12 +36,12 @@ class MainWindow(QMainWindow):
             board_size=(self.num_rows, self.num_columns),
         )
         self.chosen_snake = self.population.get_random_snake()
-        # self.chosen_snake = self.population.snakes[0]
+        self.grid_cells = [[QLabel() for _ in range(self.num_rows)] for _ in range(self.num_columns)]
         self.grid = self.initialize_grid(self.num_rows, self.num_columns, "gray")
 
         self.elitism_size = ceil(0.30 * self.population_size)
-
         self.num_of_genetic_procedures = ceil((self.population_size - self.elitism_size) / 2)
+
         timer = QTimer(self)
         timer.timeout.connect(self.update_on_timeout)
         timer.start(50)
@@ -59,19 +59,19 @@ class MainWindow(QMainWindow):
         grid = QGridLayout()
         for i in range(0, n_rows):
             for j in range(0, n_columns):
-                label = QLabel()
-                label.setStyleSheet(f"background-color: {grid_color}")
-                grid.addWidget(label, i, j)
+                # label = QLabel()
+                cell = self.grid_cells[i][j]
+                cell.setStyleSheet(f"background-color: {grid_color}")
+                grid.addWidget(cell, i, j)
         return grid
 
     def reset_grid(self, grid_color: str):
         # TODO: Reset only the ones that are painted.
         for i in range(0, self.num_rows):
             for j in range(0, self.num_columns):
-                label = QLabel()
-                label.setStyleSheet(f"background-color: {grid_color}")
-                self.grid.addWidget(label, i, j)
-
+                # label = QLabel()
+                cell = self.grid_cells[i][j]
+                cell.setStyleSheet(f"background-color: {grid_color}")
 
 
 
@@ -134,17 +134,23 @@ class MainWindow(QMainWindow):
     @Slot()
     def update_on_timeout(self):
         if self.chosen_snake.is_alive:  # Color the apple
-            label = QLabel()
-            label.setStyleSheet("background-color: red;")
-            self.grid.addWidget(
-                label, self.chosen_snake.apple.y, self.chosen_snake.apple.x
-            )
+            # label = QLabel()
+            # label.setStyleSheet("background-color: red;")
+            # self.grid.addWidget(
+            #     label, self.chosen_snake.apple.y, self.chosen_snake.apple.x
+            # )
+
+            cell = self.grid_cells[self.chosen_snake.apple.y][self.chosen_snake.apple.x]
+            cell.setStyleSheet("background-color: red;")
+
             # Color new snake positions with green:
             # TODO: Color only the new cell
             for p in self.chosen_snake.body:
-                label = QLabel()
-                label.setStyleSheet("background-color: green")
-                self.grid.addWidget(label, p.y, p.x)
+                # label = QLabel()
+                # label.setStyleSheet("background-color: green")
+                # self.grid.addWidget(label, p.y, p.x)
+                cell = self.grid_cells[p.y][p.x]
+                cell.setStyleSheet("background-color: green")
 
             # Color old snake positions with gray:
             if self.old_body != None:
@@ -153,9 +159,11 @@ class MainWindow(QMainWindow):
                 )
 
                 for p in old_cells:
-                    label = QLabel()
-                    label.setStyleSheet("background-color: gray")
-                    self.grid.addWidget(label, p.y, p.x)
+                    # label = QLabel()
+                    # label.setStyleSheet("background-color: gray")
+                    # self.grid.addWidget(label, p.y, p.x)
+                    cell = self.grid_cells[p.y][p.x]
+                    cell.setStyleSheet("background-color: gray")
 
             self.old_body = copy.deepcopy(self.chosen_snake.body)  # TODO: copy?
 

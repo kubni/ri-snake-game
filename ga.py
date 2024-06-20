@@ -163,7 +163,6 @@ def crossover_no_flatten(
             child2_row[split_pos:] = p1_row[split_pos:]
 
             # Append the row to the matrix/layer
-
             child1_layer.append(child1_row)
             child2_layer.append(child2_row)
 
