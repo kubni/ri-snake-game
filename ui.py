@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from math import ceil, inf
 from typing import List
-from ga import Population, crossover_no_flatten, mutation, tournament_selection
+from ga import Population, crossover_no_flatten, mutation, roulette_selection, tournament_selection
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
@@ -103,9 +103,10 @@ class MainWindow(QMainWindow):
 
         # Standard genetic procedures
         for i in range(self.num_of_genetic_procedures):
-            parent1, parent2 = tournament_selection(
-                self.population, tournament_size=self.tournament_size, num_individuals=2
-            )
+            # parent1, parent2 = tournament_selection(
+            #     self.population, tournament_size=self.tournament_size, num_individuals=2
+            # )
+            parent1, parent2 = roulette_selection(self.population, num_individuals=2)
 
             # child1_model, child2_model = crossover(parent1.model, parent2.model)
             # child1_model, child2_model = crossover2(parent1.model, parent2.model)

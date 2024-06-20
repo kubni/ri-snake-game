@@ -66,6 +66,23 @@ def tournament_selection(
     return selected_snakes
 
 
+def roulette_selection(
+        population: Population, num_individuals: int
+) -> List[Snake]:
+    selected_snakes = []
+    wheel = sum(s.fitness for s in population.snakes)
+    for _ in range(num_individuals):
+        pick = random.uniform(0, wheel)
+        current = 0
+        for s in population.snakes:
+            current += s.fitness
+            if current > pick:
+                selected_snakes.append(s)
+                break
+
+    return selected_snakes
+
+
 # def crossover(
 #     parent1: NeuralNetwork, parent2: NeuralNetwork
 # ) -> Tuple[NeuralNetwork, NeuralNetwork]:
