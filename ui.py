@@ -25,16 +25,17 @@ class MainWindow(QMainWindow):
         self.best_score = 0
         self.generation_counter = 1;
         self.mutation_prob = 0.05
-        self.tournament_size = 128
+        self.tournament_size = 256
         self.num_rows = 10
         self.num_columns = 10
         self.old_body = None
 
-        self.population_size = 500
+        self.population_size = 1000
         self.population = Population(
             population_size=self.population_size,
             board_size=(self.num_rows, self.num_columns),
         )
+
         self.chosen_snake = self.population.get_random_snake()
         self.grid_cells = [[QLabel() for _ in range(self.num_rows)] for _ in range(self.num_columns)]
         self.grid = self.initialize_grid(self.num_rows, self.num_columns, "gray")
@@ -103,10 +104,10 @@ class MainWindow(QMainWindow):
 
         # Standard genetic procedures
         for i in range(self.num_of_genetic_procedures):
-            # parent1, parent2 = tournament_selection(
-            #     self.population, tournament_size=self.tournament_size, num_individuals=2
-            # )
-            parent1, parent2 = roulette_selection(self.population, num_individuals=2)
+            parent1, parent2 = tournament_selection(
+                self.population, tournament_size=self.tournament_size, num_individuals=2
+            )
+            # parent1, parent2 = roulette_selection(self.population, num_individuals=2)
 
             # child1_model, child2_model = crossover(parent1.model, parent2.model)
             # child1_model, child2_model = crossover2(parent1.model, parent2.model)
@@ -194,7 +195,7 @@ class MainWindow(QMainWindow):
             print("#########################################################")
 
 
-            if self.generation_counter == 200:
+            if self.generation_counter == 500:
                 sys.exit(1)
             self.population = self.create_new_population()
             self.generation_counter += 1;

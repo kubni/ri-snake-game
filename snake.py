@@ -1,4 +1,5 @@
 from collections import deque
+import itertools
 from neural_network import NeuralNetwork
 import random
 import torch
@@ -103,7 +104,7 @@ class Snake:
         # self.fitness = self.steps + 2**self.score - 0.25*self.steps # encourage early exploration, more apple = better and we want it to be efficient with movement
         # self.fitness = max(self.fitness, 0)
         # self._fitness = (self.steps) + ((2**self.score) + (self.score**2.1)*500) - (((.25 * self.steps)) * (self.score))  # Bad
-        self.fitness = (self.steps) + ((2**self.score) + (self.score**2.1)*500) - (((.25 * self.steps)**1.3) * (self.score**1.2))
+        self.fitness = (self.steps) + ((2**self.score) + (self.score**2.1)*500)
         self.fitness = max(self.fitness, 0)
 
     def generate_apple(self):
@@ -190,19 +191,20 @@ class Snake:
             )
         )
 
-        snake_direction_array = [0 for _ in range(len(self.possible_directions))]
-        snake_direction_array[
-            self.possible_directions.index(self.current_direction)
-        ] = 1  # array of directions when only one of them have value 1
-        input_array = np.append(input_array, snake_direction_array)
 
-        tail_direction_array = [0 for _ in range(len(self.possible_directions))]
-        tail_direction_array[
-            self.possible_directions.index(self.current_tail_direction)
-        ] = 1
-        input_array = np.append(input_array, tail_direction_array)
+        # snake_direction_array = [0 for _ in range(len(self.possible_directions))]
+        # snake_direction_array[
+        #     self.possible_directions.index(self.current_direction)
+        # ] = 1  # array of directions when only one of them have value 1
+        # input_array = np.append(input_array, snake_direction_array)
 
-        return input_array
+        # tail_direction_array = [0 for _ in range(len(self.possible_directions))]
+        # tail_direction_array[
+        #     self.possible_directions.index(self.current_tail_direction)
+        # ] = 1
+        # input_array = np.append(input_array, tail_direction_array)
+
+        return np.array(list(itertools.chain.from_iterable(input_array)))
 
     def look(self):
         for i, vision_step in enumerate(self.vision_steps):
@@ -214,7 +216,8 @@ class Snake:
         input_array = (
             self.create_input_for_nn()
         )  # this should be snake vision + encoded direction of a head + encoded direction of a tail
-        output = self.model(torch.tensor(input_array).float())
+        # print(input_array[np.newaxis,:].shape)
+        output = self.model(torch.tensor(input_array[np.newaxis,:]).float())
         self.new_direction = self.possible_directions[torch.argmax(output).item()]
 
     def move(self):

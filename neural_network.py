@@ -5,12 +5,12 @@ import torch.nn as nn
 class NeuralNetwork(nn.Module):
     def __init__(self):
         super(NeuralNetwork, self).__init__()
-        self.fc1 = nn.Linear(32, 20)
+        self.fc1 = nn.Linear(24, 16)
         self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(20, 12)
+        self.fc2 = nn.Linear(16, 8)
         self.sigmoid = nn.Sigmoid()
-        self.fc3 = nn.Linear(12,4)
-        self.softmax = nn.Softmax(dim=0)
+        self.fc3 = nn.Linear(8,4)
+        self.softmax = nn.Softmax(dim=1)
     
 
     def forward(self, x):
