@@ -181,10 +181,10 @@ class MainWindow(QMainWindow):
                 s.move()
 
         if self.population.is_dead():
-            print("The entire generation is dead. Goodbye cruel world...")
+            print(f"\033[91mThe entire generation #{self.generation_counter} is dead. Goodbye cruel world...\033[0m")
             self.population.calculate_fitness()
 
-            print(f"#### Data for generation #{self.generation_counter} ####")
+            print(f"#################### Data for generation #{self.generation_counter} #############")
             best_individual_in_generation, best_fitness_in_generation = self.population.get_best_individual_and_fitness()
             if best_fitness_in_generation > self.best_fitness:
                 self.best_fitness = best_fitness_in_generation
@@ -194,17 +194,17 @@ class MainWindow(QMainWindow):
             print("Average generation fitness :", self.population.get_avg_pop_fitness())
             print("Best individual fitness in generation: ", best_fitness_in_generation)
             print("Best individual's score: ", best_individual_in_generation.score)
-            print("#################### Global stats #######################")
+            print("\n#################### Global stats #######################")
             print("Best ever individual fitness: ", self.best_fitness)
             print("Best ever score: ", self.best_score)
-            print("#########################################################")
+            print("#########################################################\n")
 
 
             if self.generation_counter == self.num_generations:
                 generations = list(range(1, self.num_generations + 1))
                 plt.figure(figsize=(10, 6))
                 plt.plot(generations, self.fitness_values, marker='o', linestyle='-', color='b', label='Fitness')
-                plt.title('Fitness with 500 snake per generation')
+                plt.title('Fitness with 500 snakes per generation')
                 plt.xlabel('Generation')
                 plt.ylabel('Fitness')
                 plt.legend()
