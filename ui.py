@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from math import ceil, inf
 from typing import List
+import matplotlib.pyplot as plt
+
 from ga import Population, crossover_no_flatten, mutation, roulette_selection, tournament_selection
 from PySide6.QtWidgets import (
     QApplication,
@@ -26,8 +28,10 @@ class MainWindow(QMainWindow):
         self.generation_counter = 1;
         self.mutation_prob = 0.05
         self.tournament_size = 256
-        self.num_rows = 10
-        self.num_columns = 10
+        self.fitness_values = []
+        self.num_generations = 200
+        self.num_rows = 5
+        self.num_columns = 5
         self.old_body = None
 
         self.population_size = 1000
@@ -186,6 +190,7 @@ class MainWindow(QMainWindow):
                 self.best_fitness = best_fitness_in_generation
             if best_individual_in_generation.score > self.best_score:
                 self.best_score = best_individual_in_generation.score
+            self.fitness_values.append(self.best_fitness)
             print("Average generation fitness :", self.population.get_avg_pop_fitness())
             print("Best individual fitness in generation: ", best_fitness_in_generation)
             print("Best individual's score: ", best_individual_in_generation.score)
@@ -195,7 +200,17 @@ class MainWindow(QMainWindow):
             print("#########################################################")
 
 
-            if self.generation_counter == 500:
+            if self.generation_counter == self.num_generations:
+                generations = list(range(1, self.num_generations + 1))
+                plt.figure(figsize=(10, 6))
+                plt.plot(generations, self.fitness_values, marker='o', linestyle='-', color='b', label='Fitness')
+                plt.title('Fitness with 500 snake per generation')
+                plt.xlabel('Generation')
+                plt.ylabel('Fitness')
+                plt.legend()
+                plt.grid(True)
+                plt.savefig("500_snakes.png")
+
                 sys.exit(1)
             self.population = self.create_new_population()
             self.generation_counter += 1;
