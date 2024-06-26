@@ -66,21 +66,30 @@ def tournament_selection(
     return selected_snakes
 
 
-def roulette_selection(
-        population: Population, num_individuals: int
-) -> List[Snake]:
-    selected_snakes = []
-    wheel = sum(s.fitness for s in population.snakes)
-    for _ in range(num_individuals):
-        pick = random.uniform(0, wheel)
-        current = 0
-        for s in population.snakes:
-            current += s.fitness
-            if current > pick:
-                selected_snakes.append(s)
-                break
+# def roulette_selection(
+#         population: Population, num_individuals: int
+# ) -> List[Snake]:
+#     selected_snakes = []
+#     wheel = sum(s.fitness for s in population.snakes)
+#     for _ in range(num_individuals):
+#         pick = random.uniform(0, wheel)
+#         current = 0
+#         for s in population.snakes:
+#             current += s.fitness
+#             if current > pick:
+#                 selected_snakes.append(s)
+#                 break
 
-    return selected_snakes
+#     return selected_snakes
+
+def roulette_selection(
+        population: Population,
+        num_individuals: int
+) -> List[Snake]:
+    fitness_values = [snake.fitness for snake in population.snakes] # These will be weights for our random selection
+    return random.choices(population.snakes, weights=fitness_values, k=num_individuals)
+
+
 
 
 # def crossover(

@@ -64,17 +64,14 @@ class MainWindow(QMainWindow):
         grid = QGridLayout()
         for i in range(0, n_rows):
             for j in range(0, n_columns):
-                # label = QLabel()
                 cell = self.grid_cells[i][j]
                 cell.setStyleSheet(f"background-color: {grid_color}")
                 grid.addWidget(cell, i, j)
         return grid
 
     def reset_grid(self, grid_color: str):
-        # TODO: Reset only the ones that are painted.
         for i in range(0, self.num_rows):
             for j in range(0, self.num_columns):
-                # label = QLabel()
                 cell = self.grid_cells[i][j]
                 cell.setStyleSheet(f"background-color: {grid_color}")
 
@@ -108,10 +105,10 @@ class MainWindow(QMainWindow):
 
         # Standard genetic procedures
         for i in range(self.num_of_genetic_procedures):
-            parent1, parent2 = tournament_selection(
-                self.population, tournament_size=self.tournament_size, num_individuals=2
-            )
-            # parent1, parent2 = roulette_selection(self.population, num_individuals=2)
+            # parent1, parent2 = tournament_selection(
+            #     self.population, tournament_size=self.tournament_size, num_individuals=2
+            # )
+            parent1, parent2 = roulette_selection(self.population, num_individuals=2)
 
             # child1_model, child2_model = crossover(parent1.model, parent2.model)
             # child1_model, child2_model = crossover2(parent1.model, parent2.model)
@@ -152,9 +149,6 @@ class MainWindow(QMainWindow):
             # Color new snake positions with green:
             # TODO: Color only the new cell
             for p in self.chosen_snake.body:
-                # label = QLabel()
-                # label.setStyleSheet("background-color: green")
-                # self.grid.addWidget(label, p.y, p.x)
                 cell = self.grid_cells[p.y][p.x]
                 cell.setStyleSheet("background-color: green")
 
@@ -165,16 +159,12 @@ class MainWindow(QMainWindow):
                 )
 
                 for p in old_cells:
-                    # label = QLabel()
-                    # label.setStyleSheet("background-color: gray")
-                    # self.grid.addWidget(label, p.y, p.x)
                     cell = self.grid_cells[p.y][p.x]
                     cell.setStyleSheet("background-color: gray")
 
-            self.old_body = copy.deepcopy(self.chosen_snake.body)  # TODO: copy?
+            self.old_body = copy.deepcopy(self.chosen_snake.body) 
 
         # Move the whole population
-        # TODO: Should this be at the beginning?
         for s in self.population:
             if s.is_alive:
                 s.update()
@@ -199,19 +189,19 @@ class MainWindow(QMainWindow):
             print("Best ever score: ", self.best_score)
             print("#########################################################\n")
 
-
             if self.generation_counter == self.num_generations:
                 generations = list(range(1, self.num_generations + 1))
                 plt.figure(figsize=(10, 6))
                 plt.plot(generations, self.fitness_values, marker='o', linestyle='-', color='b', label='Fitness')
-                plt.title('Fitness with 500 snakes per generation')
+                plt.title('Fitness with 1000 snakes per generation')
                 plt.xlabel('Generation')
                 plt.ylabel('Fitness')
                 plt.legend()
                 plt.grid(True)
-                plt.savefig("500_snakes.png")
+                plt.savefig("1000_snakes_roulette_cross-per-row.png")
 
                 sys.exit(1)
+
             self.population = self.create_new_population()
             self.generation_counter += 1;
 
