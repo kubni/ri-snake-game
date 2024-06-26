@@ -3,7 +3,7 @@ from math import ceil, inf
 from typing import List
 import matplotlib.pyplot as plt
 
-from ga import Population, crossover_no_flatten, mutation, roulette_selection, tournament_selection
+from ga import Population, uniform_crossover, single_point_per_layer_crossover, single_point_per_row_crossover, mutation, roulette_selection, tournament_selection
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
@@ -105,14 +105,14 @@ class MainWindow(QMainWindow):
 
         # Standard genetic procedures
         for i in range(self.num_of_genetic_procedures):
-            # parent1, parent2 = tournament_selection(
-            #     self.population, tournament_size=self.tournament_size, num_individuals=2
-            # )
-            parent1, parent2 = roulette_selection(self.population, num_individuals=2)
+            parent1, parent2 = tournament_selection(
+                self.population, tournament_size=self.tournament_size, num_individuals=2
+            )
+            # parent1, parent2 = roulette_selection(self.population, num_individuals=2)
 
-            # child1_model, child2_model = crossover(parent1.model, parent2.model)
-            # child1_model, child2_model = crossover2(parent1.model, parent2.model)
-            child1_model, child2_model = crossover_no_flatten(parent1.model, parent2.model)
+            # child1_model, child2_model = single_point_per_layer_crossover(parent1.model, parent2.model)
+            # child1_model, child2_model = uniform_crossover(parent1.model, parent2.model)
+            child1_model, child2_model = single_point_per_row_crossover(parent1.model, parent2.model)
 
             # Mutation
             mutation(child1_model, mutation_probability=self.mutation_prob)
@@ -136,21 +136,21 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def update_on_timeout(self):
-        if self.chosen_snake.is_alive:  # Color the apple
-            # label = QLabel()
-            # label.setStyleSheet("background-color: red;")
-            # self.grid.addWidget(
-            #     label, self.chosen_snake.apple.y, self.chosen_snake.apple.x
-            # )
-
+        if self.chosen_snake.is_alive:
+            # Color the apple
             cell = self.grid_cells[self.chosen_snake.apple.y][self.chosen_snake.apple.x]
             cell.setStyleSheet("background-color: red;")
 
-            # Color new snake positions with green:
+            # Color new snake positions:
             # TODO: Color only the new cell
             for p in self.chosen_snake.body:
                 cell = self.grid_cells[p.y][p.x]
                 cell.setStyleSheet("background-color: green")
+
+            # Differentiante the head from the rest of the body:
+            head = self.chosen_snake.body[0]
+            head_cell = self.grid_cells[head.y][head.x]
+            head_cell.setStyleSheet("background-color: blue")
 
             # Color old snake positions with gray:
             if self.old_body != None:
@@ -193,12 +193,12 @@ class MainWindow(QMainWindow):
                 generations = list(range(1, self.num_generations + 1))
                 plt.figure(figsize=(10, 6))
                 plt.plot(generations, self.fitness_values, marker='o', linestyle='-', color='b', label='Fitness')
-                plt.title('Fitness with 1000 snakes per generation')
+                plt.title('Fitness with tournament selection on 10x10 grid')
                 plt.xlabel('Generation')
                 plt.ylabel('Fitness')
                 plt.legend()
                 plt.grid(True)
-                plt.savefig("1000_snakes_roulette_cross-per-row.png")
+                plt.savefig("1000_snakes_tournament.png")
 
                 sys.exit(1)
 
@@ -207,9 +207,7 @@ class MainWindow(QMainWindow):
 
             self.reset_grid('gray')
             self.old_body = None
-            # self.chosen_snake = self.population.get_random_snake()
             self.chosen_snake = self.population.snakes[0]
-            # sys.exit(1)  # NOTE: Placeholder
 
 
 if __name__ == "__main__":
